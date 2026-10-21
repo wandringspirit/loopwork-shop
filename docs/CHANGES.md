@@ -10,6 +10,9 @@ Newest first. Dates are IST.
 
 ## 2026-10-21
 
+- **Deployed:** version `e80af803-fa79-49d0-97bf-42d0a65d0777`, with the single `/for-sellers/` address, the international page and the docs (roll back to `ef47b7ce-5941-428e-8541-bfeaa0fe7966`). Deployed from the piyushgaur17 login, which is now an Administrator on the leadpilot01 account.
+- **Deployed:** version `ef47b7ce-5941-428e-8541-bfeaa0fe7966` at 19:51, from the leadpilot01 login, outside this session's log. It held the international page but not yet the single `/for-sellers/` address.
+- **Infra:** piyushgaur17@gmail.com was invited to the leadpilot01 Cloudflare account as Administrator, so one wrangler login deploys here and to the owner's other projects; `account_id` in `wrangler.jsonc` picks the account.
 - **Sales:** `/for-sellers/` is now the one sales address for everyone: visitors in India see the ₹ page and everyone else the USD page, at the same address, using Cloudflare's country for the request (`worker/index.js`, run only for `/for-sellers/`). The "Prices in ₹ / USD" links add `?region=in|intl`, remembered in a `region` cookie. The two versions also have their own addresses, `/for-sellers/india/` and `/for-sellers/international/`. Without the Worker (local dev, preview), `src/pages/for-sellers/index.astro` guesses from the browser's time zone. Client copies leave all of this out.
 - **Docs:** Added CHANGES, DEPLOY, OUTREACH (how to find and close buyers) and ROADMAP. ARCHITECTURE.md moved to v0.3.
 - **Sales:** Added `/for-sellers/international/`, a sales page for sellers outside India, priced in US dollars and paid by PayPal invoice. Both sales pages now share `src/components/SellerOffer.astro`, link to each other and declare `hreflang` alternates. Prices moved to `src/data/offers/india.json` and `international.json`. Added the handout `docs/for-sellers-international.pdf`.

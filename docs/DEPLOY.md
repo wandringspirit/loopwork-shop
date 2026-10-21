@@ -23,16 +23,16 @@ The admin at `/admin` only exists while `npm run dev` runs. It writes straight i
 | Domain | `loopwork.leadspilot.co`, a custom domain on the Worker (`routes` in `wrangler.jsonc`) |
 | Config | `wrangler.jsonc` |
 
-Your other projects deploy to the piyushgaur17 account. Wrangler is signed in to one account at a time, so check before deploying:
+**Login:** sign wrangler in as **piyushgaur17@gmail.com**. That login is an Administrator on the leadpilot01 account too (invited 2026-10-21), and `account_id` in `wrangler.jsonc` makes this project deploy to leadpilot01 while your other projects keep deploying to piyushgaur17. Check that both accounts are listed:
 
 ```bash
 npx wrangler whoami
 ```
 
-If it doesn't show leadpilot01@gmail.com, sign in again (a browser tab opens; choose that account):
+If only one account shows, sign in again. Your default Chrome profile may be the leadpilot one, so print the link instead and open it in the piyushgaur17 profile (or Incognito), allowing both accounts:
 
 ```bash
-npx wrangler login
+npx wrangler login --browser=false
 ```
 
 Then build and deploy:
