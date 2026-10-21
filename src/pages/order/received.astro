@@ -1,0 +1,253 @@
+---
+import WhatsAppIcon from '../../components/WhatsAppIcon.astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { whatsappLink } from '../../lib/whatsapp';
+import { site } from '../../site.config';
+
+const sendsViaWhatsApp = site.orderMode === 'whatsapp';
+---
+
+<BaseLayout title="Order request" noindex showWhatsApp={false}>
+  <div class="wrap received" data-received>
+    <div class="received-empty" data-received-empty hidden>
+      <h1 class="display page-title">No recent order here</h1>
+      <p class="page-lede">If you've just sent an order, check your WhatsApp. Otherwise, the shop is one click away.</p>
+      <a class="btn btn-primary" href="/shop/">Browse the shop</a>
+    </div>
+
+    <div class="received-order" data-received-order hidden>
+      <header class="received-head">
+        <p class="eyebrow">Order request <span data-order-id></span></p>
+        <h1 class="display page-title">Thank you, <span data-customer-name></span>!</h1>
+        {
+          sendsViaWhatsApp ? (
+            <p class="page-lede">
+              One last step: send your order on WhatsApp so it reaches us. It should already be open and ready to send.
+            </p>
+          ) : (
+            <p class="page-lede">Your order request has reached us. We'll message you on WhatsApp soon.</p>
+          )
+        }
+      </header>
+
+      <div class="received-layout">
+        <div class="received-main">
+          {
+            sendsViaWhatsApp && (
+              <div class="send-box">
+                <p>
+                  <strong>Didn't see WhatsApp open?</strong> Tap below to send your order. We can only confirm orders that
+                  reach us.
+                </p>
+                <a class="btn btn-primary" data-whatsapp-link href={whatsappLink()} target="_blank" rel="noopener">
+                  <WhatsAppIcon />
+                  Send order on WhatsApp
+                </a>
+              </div>
+            )
+          }
+
+          <section class="next" aria-labelledby="next-title">
+            <h2 id="next-title" class="block-title">What happens next</h2>
+            <ol class="next-steps" role="list">
+              <li>
+                <span class="step-number" aria-hidden="true">1</span>
+                <p>We check your pieces and work out shipping to your PIN code.</p>
+              </li>
+              <li>
+                <span class="step-number" aria-hidden="true">2</span>
+                <p>We message you on WhatsApp with the total and payment details.</p>
+              </li>
+              <li>
+                <span class="step-number" aria-hidden="true">3</span>
+                <p>You pay by {site.payment}, and we pack your order or start making it.</p>
+              </li>
+              <li>
+                <span class="step-number" aria-hidden="true">4</span>
+                <p>We let you know on WhatsApp when it's on its way.</p>
+              </li>
+            </ol>
+          </section>
+        </div>
+
+        <aside class="received-summary" aria-labelledby="received-summary-title">
+          <h2 id="received-summary-title" class="block-title">
+            Your order <span class="order-id" data-order-id></span>
+          </h2>
+          <ul class="received-items" role="list" data-received-items></ul>
+          <dl class="summary-rows">
+            <div>
+              <dt>Subtotal</dt>
+              <dd data-received-subtotal></dd>
+            </div>
+            <div>
+              <dt>Shipping</dt>
+              <dd>Confirmed on WhatsApp</dd>
+            </div>
+          </dl>
+          <p class="received-delivery"><strong>Delivery:</strong> <span data-received-delivery></span></p>
+        </aside>
+      </div>
+    </div>
+
+    <noscript>
+      <p class="page-lede">Turn on JavaScript to see your order summary.</p>
+    </noscript>
+  </div>
+</BaseLayout>
+
+<style>
+  .received {
+    padding-top: clamp(1.5rem, 1rem + 2vw, 3rem);
+  }
+
+  .received-empty,
+  .received-head {
+    display: grid;
+    justify-items: start;
+    gap: 0.9rem;
+  }
+
+  .received-layout {
+    display: grid;
+    align-items: start;
+    gap: 2rem;
+    margin-top: clamp(1.5rem, 1rem + 2vw, 2.5rem);
+  }
+
+  @media (min-width: 60rem) {
+    .received-layout {
+      grid-template-columns: minmax(0, 1fr) minmax(18rem, 24rem);
+      gap: 4rem;
+    }
+  }
+
+  .received-main {
+    display: grid;
+    gap: 2.5rem;
+  }
+
+  .send-box {
+    display: grid;
+    justify-items: start;
+    gap: 1rem;
+    padding: 1.4rem;
+    border-radius: var(--radius-lg);
+    background: var(--mint-soft);
+  }
+
+  .next {
+    display: grid;
+    gap: 1.25rem;
+  }
+
+  .next-steps {
+    display: grid;
+    gap: 1rem;
+  }
+
+  .next-steps li {
+    display: grid;
+    grid-template-columns: 2.75rem minmax(0, 1fr);
+    align-items: center;
+    gap: 1rem;
+    color: var(--ink-soft);
+  }
+
+  .received-summary {
+    display: grid;
+    gap: 1rem;
+    padding: 1.4rem;
+    border-radius: var(--radius-lg);
+    background: var(--paper);
+  }
+
+  .order-id {
+    font-size: var(--text-sm);
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    color: var(--muted);
+  }
+
+  .received-items :global(li) {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 0.1rem 1rem;
+    padding-block: 0.7rem;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .received-items :global(.item-name) {
+    font-weight: 700;
+  }
+
+  .received-items :global(.item-price) {
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+  }
+
+  .received-items :global(.item-meta) {
+    grid-column: 1 / -1;
+    font-size: var(--text-xs);
+    color: var(--muted);
+  }
+
+  .received-delivery {
+    font-size: var(--text-sm);
+    color: var(--ink-soft);
+  }
+</style>
+
+<script>
+  import { formatPrice } from '../../lib/format';
+  import { describeOptions, orderMessage, whatsappLink } from '../../lib/whatsapp';
+  import { readLastOrder } from '../../scripts/last-order';
+
+  const root = document.querySelector<HTMLElement>('[data-received]');
+  const order = readLastOrder();
+
+  if (root && !order) {
+    root.querySelector<HTMLElement>('[data-received-empty]')!.hidden = false;
+  }
+
+  if (root && order) {
+    const view = root.querySelector<HTMLElement>('[data-received-order]')!;
+    const fill = (selector: string, text: string) =>
+      view.querySelectorAll(selector).forEach((node) => {
+        node.textContent = text;
+      });
+
+    const { delivery } = order;
+    fill('[data-order-id]', order.id);
+    fill('[data-customer-name]', order.customer.name.split(/\s+/)[0] || order.customer.name);
+    fill('[data-received-subtotal]', formatPrice(order.subtotal));
+    fill(
+      '[data-received-delivery]',
+      delivery.method === 'pickup' ? 'Pickup' : [delivery.address, delivery.city, delivery.pincode].filter(Boolean).join(', '),
+    );
+
+    const link = view.querySelector<HTMLAnchorElement>('[data-whatsapp-link]');
+    if (link) link.href = whatsappLink(orderMessage(order));
+
+    const paragraph = (className: string, text: string) => {
+      const node = document.createElement('p');
+      node.className = className;
+      node.textContent = text;
+      return node;
+    };
+    view.querySelector('[data-received-items]')!.replaceChildren(
+      ...order.items.map((item) => {
+        const row = document.createElement('li');
+        row.append(
+          paragraph('item-name', `${item.qty} × ${item.name}`),
+          paragraph('item-price', formatPrice(item.unitPrice * item.qty)),
+        );
+        const options = describeOptions(item.options);
+        if (options) row.append(paragraph('item-meta', options));
+        return row;
+      }),
+    );
+
+    view.hidden = false;
+  }
+</script>

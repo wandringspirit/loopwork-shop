@@ -1,0 +1,416 @@
+---
+import { getImage } from 'astro:assets';
+import { getCollection, getEntry, render } from 'astro:content';
+import BallBand from '../../components/BallBand.astro';
+import Gallery from '../../components/Gallery.astro';
+import ProductCard from '../../components/ProductCard.astro';
+import StatusBadge from '../../components/StatusBadge.astro';
+import WhatsAppIcon from '../../components/WhatsAppIcon.astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { categoryColours, getCategories, getListedProducts, productUrl, type Product } from '../../lib/catalog';
+import { formatPrice } from '../../lib/format';
+import { isOrderable } from '../../lib/status';
+import { productQuestion, whatsappLink } from '../../lib/whatsapp';
+import { site } from '../../site.config';
+
+export async function getStaticPaths() {
+  const products = await getCollection('products', ({ data }) => data.status !== 'hidden');
+  return products.map((product) => ({ params: { slug: product.id }, props: { product } }));
+}
+
+interface Props {
+  product: Product;
+}
+
+const { product } = Astro.props;
+const { data } = product;
+const [category, categories, listed, { Content }] = await Promise.all([
+  getEntry(data.category),
+  getCategories(),
+  getListedProducts(),
+  render(product),
+]);
+
+const categoryName = new Map(categories.map((entry) => [entry.id, entry.data.name]));
+const colourOf = categoryColours(categories);
+const orderable = isOrderable(data.status);
+const pageUrl = new URL(productUrl(product.id), Astro.site).href;
+const askLink = whatsappLink(productQuestion(data.name, pageUrl));
+
+const leadTime = data.leadTime ? ` ${data.leadTime}.` : '';
+const making =
+  data.status === 'sold-out'
+    ? 'Sold out. We can make something similar to order.'
+    : data.status === 'made-to-order'
+      ? `Made to order.${leadTime}`
+      : `Ready to ship.${leadTime}`;
+
+const others = listed.filter((item) => item.id !== product.id && isOrderable(item.data.status));
+const related = [
+  ...others.filter((item) => item.data.category.id === data.category.id),
+  ...others.filter((item) => item.data.category.id !== data.category.id),
+].slice(0, 4);
+
+const images = await Promise.all(data.photos.map((photo) => getImage({ src: photo.src, width: 1200, format: 'jpg' })));
+const availability = {
+  available: 'InStock',
+  'made-to-order': 'MadeToOrder',
+  'sold-out': 'SoldOut',
+  hidden: 'Discontinued',
+}[data.status];
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Product',
+  name: data.name,
+  description: data.summary,
+  image: images.map((image) => new URL(image.src, Astro.site).href),
+  category: category?.data.name,
+  offers: {
+    '@type': 'Offer',
+    url: pageUrl,
+    priceCurrency: site.currency,
+    price: data.price,
+    availability: `https://schema.org/${availability}`,
+  },
+};
+---
+
+<BaseLayout title={data.name} description={data.summary} image={data.photos[0].src} jsonLd={jsonLd}>
+  <div class:list={['wrap', 'product', `yarn-${colourOf(data.category.id)}`]}>
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+      <ol role="list">
+        <li><a href="/shop/">Shop</a></li>
+        {
+          category && (
+            <li>
+              <a class="breadcrumb-category" href={`/shop/?category=${category.id}`}>
+                {category.data.name}
+              </a>
+            </li>
+          )
+        }
+        <li aria-current="page">{data.name}</li>
+      </ol>
+    </nav>
+
+    <div class="product-layout">
+      <div class="product-gallery">
+        <Gallery name={data.name} photos={data.photos} />
+      </div>
+
+      <div class="product-info">
+        <h1 class="display product-title">{data.name}</h1>
+        <p class="product-price">{formatPrice(data.price)}</p>
+        <p class="product-availability">
+          <StatusBadge status={data.status} />
+          {data.leadTime && data.status !== 'sold-out' && <span>{data.leadTime}</span>}
+        </p>
+        <p class="product-summary">{data.summary}</p>
+
+        {
+          orderable ? (
+            <form class="add-form" data-add-form data-product-id={product.id}>
+              {data.options.map((option, index) => (
+                <fieldset class="option">
+                  <legend class="option-legend">{option.name}</legend>
+                  <div class="pills">
+                    {option.values.map((value, valueIndex) => (
+                      <label class="pill">
+                        <input
+                          type="radio"
+                          name={`option-${index}`}
+                          value={value}
+                          data-option-name={option.name}
+                          checked={valueIndex === 0}
+                        />
+                        <span>{value}</span>
+                      </label>
+                    ))}
+                  </div>
+                </fieldset>
+              ))}
+              <div class="add-row">
+                <div class="stepper" data-qty-stepper>
+                  <button type="button" data-step="-1" aria-label="One fewer">
+                    −
+                  </button>
+                  <input
+                    type="number"
+                    name="qty"
+                    value="1"
+                    min="1"
+                    max={site.maxQtyPerItem}
+                    inputmode="numeric"
+                    aria-label="Quantity"
+                  />
+                  <button type="button" data-step="1" aria-label="One more">
+                    +
+                  </button>
+                </div>
+                <button type="submit" class="btn btn-primary add-button">
+                  Add to cart
+                </button>
+              </div>
+            </form>
+          ) : (
+            <div class="sold-out">
+              <p>
+                <strong>This one has found its home.</strong> We'd be happy to make something similar for you.
+              </p>
+              <a class="btn btn-primary" href={`/custom-orders/?like=${product.id}`}>
+                Ask for a custom one
+              </a>
+            </div>
+          )
+        }
+
+        <a class="btn btn-outline btn-block" href={askLink} target="_blank" rel="noopener">
+          <WhatsAppIcon />
+          Ask about this piece
+        </a>
+
+        <ul class="assurances" role="list">
+          <li>No payment now. We confirm availability on WhatsApp first.</li>
+          <li>{site.shipping.charges}</li>
+        </ul>
+
+        <BallBand
+          materials={data.materials}
+          size={data.size}
+          making={making}
+          care={data.care}
+          careSymbols={data.careSymbols}
+        />
+      </div>
+
+      <section class="product-story" aria-labelledby="story-title">
+        <h2 id="story-title" class="story-title">About this piece</h2>
+        <div class="prose">
+          <Content />
+        </div>
+      </section>
+    </div>
+  </div>
+
+  {
+    related.length > 0 && (
+      <section class="section wrap" aria-labelledby="related-title">
+        <div class="section-head">
+          <h2 id="related-title" class="display section-title">
+            You might also like
+          </h2>
+          <a class="text-link" href="/shop/">
+            See everything
+          </a>
+        </div>
+        <div class="product-grid">
+          {related.map((item) => (
+            <ProductCard
+              product={item}
+              categoryName={categoryName.get(item.data.category.id) ?? ''}
+              colour={colourOf(item.data.category.id)}
+            />
+          ))}
+        </div>
+      </section>
+    )
+  }
+</BaseLayout>
+
+<style>
+  .product {
+    padding-top: clamp(1.25rem, 0.8rem + 1.5vw, 2rem);
+  }
+
+  .breadcrumb ol {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    font-size: var(--text-xs);
+    color: var(--muted);
+  }
+
+  .breadcrumb li + li::before {
+    content: '/';
+    margin-right: 0.35rem;
+    color: var(--line-strong);
+  }
+
+  .breadcrumb a {
+    text-decoration: none;
+  }
+
+  .breadcrumb a:hover {
+    color: var(--ink);
+    text-decoration: underline;
+  }
+
+  .breadcrumb .breadcrumb-category {
+    font-weight: 700;
+    color: var(--yarn-deep);
+  }
+
+  .breadcrumb [aria-current] {
+    font-weight: 600;
+    color: var(--ink);
+  }
+
+  .product-layout {
+    display: grid;
+    gap: 2rem;
+    margin-top: 1.25rem;
+  }
+
+  @media (min-width: 60rem) {
+    .product-layout {
+      grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+      align-items: start;
+      column-gap: clamp(2rem, 1rem + 3vw, 4.5rem);
+      row-gap: 3rem;
+    }
+
+    .product-gallery {
+      grid-column: 1;
+      grid-row: 1;
+    }
+
+    .product-story {
+      grid-column: 1;
+      grid-row: 2;
+    }
+
+    .product-info {
+      position: sticky;
+      top: calc(var(--header-h) + 1.5rem);
+      grid-column: 2;
+      grid-row: 1 / span 2;
+    }
+  }
+
+  .product-info {
+    display: grid;
+    align-content: start;
+    gap: 1.1rem;
+  }
+
+  .product-title {
+    font-size: clamp(2.2rem, 1.6rem + 2.4vw, 3.4rem);
+  }
+
+  .product-price {
+    font-size: var(--text-xl);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .product-availability {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 0.75rem;
+    font-size: var(--text-sm);
+    color: var(--ink-soft);
+  }
+
+  .product-summary {
+    font-size: var(--text-lg);
+    line-height: 1.5;
+    color: var(--ink-soft);
+  }
+
+  .add-form {
+    display: grid;
+    gap: 1.25rem;
+    padding-top: 0.25rem;
+  }
+
+  .option-legend {
+    margin-bottom: 0.55rem;
+    font-size: var(--text-sm);
+    font-weight: 700;
+  }
+
+  .add-row {
+    display: flex;
+    gap: 0.75rem;
+  }
+
+  .add-button {
+    flex: 1;
+  }
+
+  .sold-out {
+    display: grid;
+    justify-items: start;
+    gap: 0.9rem;
+    padding: 1.1rem 1.2rem;
+    border-radius: var(--radius);
+    background: var(--yarn-soft);
+  }
+
+  .assurances {
+    display: grid;
+    gap: 0.45rem;
+    font-size: var(--text-sm);
+    color: var(--ink-soft);
+  }
+
+  .assurances li {
+    position: relative;
+    padding-left: 1.5rem;
+  }
+
+  .assurances li::before {
+    content: '';
+    position: absolute;
+    top: 0.3em;
+    left: 0;
+    width: 0.95rem;
+    height: 0.95rem;
+    background: var(--mint);
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='m3 8.5 3.2 3.2L13 5' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")
+      center / contain no-repeat;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='m3 8.5 3.2 3.2L13 5' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")
+      center / contain no-repeat;
+  }
+
+  .product-story {
+    display: grid;
+    gap: 0.75rem;
+  }
+
+  .story-title {
+    font-size: var(--text-xl);
+  }
+</style>
+
+<script>
+  import { cart, openCartDrawer } from '../../scripts/cart';
+
+  const form = document.querySelector<HTMLFormElement>('[data-add-form]');
+  const productId = form?.dataset.productId;
+  const qtyInput = form?.querySelector<HTMLInputElement>('input[name="qty"]');
+
+  if (form && productId && qtyInput) {
+    const clampQty = (value: number) => Math.min(Number(qtyInput.max), Math.max(1, Math.round(value) || 1));
+
+    form.querySelector('[data-qty-stepper]')?.addEventListener('click', (event) => {
+      const button = (event.target as Element).closest<HTMLButtonElement>('[data-step]');
+      if (button) qtyInput.value = String(clampQty(Number(qtyInput.value) + Number(button.dataset.step)));
+    });
+    qtyInput.addEventListener('change', () => {
+      qtyInput.value = String(clampQty(Number(qtyInput.value)));
+    });
+
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+      const options: Record<string, string> = {};
+      form.querySelectorAll<HTMLInputElement>('input[type="radio"]:checked').forEach((input) => {
+        if (input.dataset.optionName) options[input.dataset.optionName] = input.value;
+      });
+      const key = cart.add(productId, options, clampQty(Number(qtyInput.value)));
+      qtyInput.value = '1';
+      openCartDrawer(key);
+    });
+  }
+</script>

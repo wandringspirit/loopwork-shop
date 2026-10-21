@@ -1,0 +1,137 @@
+---
+import CareSymbol from './CareSymbol.astro';
+import { careLabels, type CareSymbolName } from '../lib/care';
+import { site } from '../site.config';
+
+interface Props {
+  materials: string;
+  size?: string;
+  making: string;
+  care: string;
+  careSymbols: CareSymbolName[];
+}
+
+// Product details laid out like the paper band wrapped around a ball of yarn.
+const { materials, size, making, care, careSymbols } = Astro.props;
+---
+
+<section class="ball-band" aria-labelledby="details-title">
+  <div class="ball-band-inner">
+    <div class="ball-band-head">
+      <h2 id="details-title" class="ball-band-title">Details &amp; care</h2>
+      <p class="ball-band-origin">Handmade in {site.country}</p>
+    </div>
+    <dl class="rows">
+      <div>
+        <dt>Yarn</dt>
+        <dd>{materials}</dd>
+      </div>
+      {
+        size && (
+          <div>
+            <dt>Size</dt>
+            <dd>{size}</dd>
+          </div>
+        )
+      }
+      <div>
+        <dt>Making</dt>
+        <dd>{making}</dd>
+      </div>
+      <div>
+        <dt>Care</dt>
+        <dd>{care}</dd>
+      </div>
+    </dl>
+    {
+      careSymbols.length > 0 && (
+        <ul class="care-list" role="list">
+          {careSymbols.map((symbol) => (
+            <li>
+              <CareSymbol symbol={symbol} />
+              <span>{careLabels[symbol]}</span>
+            </li>
+          ))}
+        </ul>
+      )
+    }
+  </div>
+</section>
+
+<style>
+  /* Tinted with the product's category colour, like a coloured paper yarn label. */
+  .ball-band {
+    --muted: var(--ink-soft);
+    --line: color-mix(in srgb, var(--yarn-deep, var(--ink)) 18%, transparent);
+    padding: 0.45rem;
+    border-radius: var(--radius);
+    background: var(--yarn-soft, var(--paper));
+  }
+
+  /* Dashed inner border reads as a stitched label edge. */
+  .ball-band-inner {
+    display: grid;
+    gap: 0.9rem;
+    padding: 1.1rem 1.2rem 1.2rem;
+    border: 1.5px dashed color-mix(in srgb, var(--yarn-deep, var(--ink)) 45%, transparent);
+    border-radius: calc(var(--radius) - 4px);
+  }
+
+  .ball-band-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.25rem 1rem;
+  }
+
+  .ball-band-title {
+    font-size: var(--text-xs);
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--yarn-deep, var(--ink));
+  }
+
+  .ball-band-origin {
+    font-size: var(--text-xs);
+    color: var(--muted);
+  }
+
+  .rows div {
+    display: grid;
+    grid-template-columns: 5.25rem minmax(0, 1fr);
+    gap: 1rem;
+    padding-block: 0.6rem;
+    border-top: 1px solid var(--line);
+  }
+
+  .rows dt {
+    padding-top: 0.1rem;
+    font-size: var(--text-xs);
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .rows dd {
+    font-size: var(--text-sm);
+  }
+
+  .care-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem 1.1rem;
+    padding-top: 0.85rem;
+    border-top: 1px solid var(--line);
+  }
+
+  .care-list li {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: var(--text-xs);
+    color: var(--ink-soft);
+  }
+</style>

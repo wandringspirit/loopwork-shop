@@ -1,0 +1,257 @@
+---
+import { Image } from 'astro:assets';
+import { getCollection } from 'astro:content';
+import PageHeader from '../components/PageHeader.astro';
+import WhatsAppIcon from '../components/WhatsAppIcon.astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import customImage from '../assets/site/custom.jpg';
+import { whatsappLink } from '../lib/whatsapp';
+import { site } from '../site.config';
+
+const [faqs, products] = await Promise.all([
+  getCollection('faq', ({ data }) => data.group === 'Custom orders'),
+  getCollection('products', ({ data }) => data.status !== 'hidden'),
+]);
+
+// Lets "Ask for a custom one" links (/custom-orders/?like=<product-id>) show which piece inspired the request.
+const productNames = Object.fromEntries(products.map((product) => [product.id, product.data.name]));
+const pieceTypes = ['Amigurumi toy', 'Bag or accessory', 'Hat or wearable', 'Something for the home', 'Something else'];
+const budgets = ['Under ₹1,000', '₹1,000–2,500', '₹2,500–5,000', 'Over ₹5,000', 'Not sure yet'];
+---
+
+<BaseLayout
+  title="Custom orders"
+  description={`Commission a handmade crochet piece from ${site.name}: your colours, your size, your idea.`}
+  image={customImage}
+>
+  <PageHeader title="Made for you, stitch by stitch" eyebrow="Custom orders" colour="lilac">
+    <p class="page-lede">
+      Your colours, your size, a name, or an idea that doesn't exist yet. Tell us what you have in mind and we'll plan it
+      together on WhatsApp.
+    </p>
+    <a class="btn btn-primary" href="#idea">Share your idea</a>
+    <div slot="aside" class="custom-photo mount yarn-marigold">
+      <Image
+        src={customImage}
+        alt={site.sitePhotos.custom.alt}
+        widths={[480, 720, 960]}
+        sizes="(min-width: 60rem) 36vw, 100vw"
+        priority
+        class="custom-img"
+      />
+    </div>
+  </PageHeader>
+
+  <section class="section wrap" aria-labelledby="custom-steps-title">
+    <h2 id="custom-steps-title" class="display section-title steps-title">How it works</h2>
+    <ol class="steps" role="list" style="--steps: 4">
+      <li class="step">
+        <span class="step-number" aria-hidden="true">1</span>
+        <h3>Share your idea</h3>
+        <p>Fill in the form below. Photos of anything that inspires you help a lot.</p>
+      </li>
+      <li class="step">
+        <span class="step-number" aria-hidden="true">2</span>
+        <h3>We plan it together</h3>
+        <p>On WhatsApp we agree the design, colours, price and a realistic timeline.</p>
+      </li>
+      <li class="step">
+        <span class="step-number" aria-hidden="true">3</span>
+        <h3>We make it</h3>
+        <p>When everything's agreed, we start stitching and share progress photos along the way.</p>
+      </li>
+      <li class="step">
+        <span class="step-number" aria-hidden="true">4</span>
+        <h3>It's on its way</h3>
+        <p>Your finished piece is packed with care and sent to you.</p>
+      </li>
+    </ol>
+  </section>
+
+  <section id="idea" class="section wrap custom-form-section" aria-labelledby="custom-form-title">
+    <div class="custom-form-intro">
+      <h2 id="custom-form-title" class="display section-title">Tell us your idea</h2>
+      <p>Sending this opens WhatsApp with your request ready to go. Add reference photos in the chat.</p>
+      {
+        faqs.length > 0 && (
+          <div class="custom-faq yarn-lilac">
+            {faqs.map((item) => (
+              <details class="faq-item">
+                <summary>{item.data.question}</summary>
+                <p>{item.data.answer}</p>
+              </details>
+            ))}
+          </div>
+        )
+      }
+    </div>
+
+    <form class="custom-form" data-custom-form data-product-names={JSON.stringify(productNames)} novalidate>
+      <p class="like-note" data-like-note hidden>Inspired by: <strong data-like-name></strong></p>
+      <input type="hidden" name="like" />
+
+      <div class="form-grid">
+        <div class="field">
+          <label for="custom-name">Your name</label>
+          <input
+            id="custom-name"
+            name="name"
+            class="input"
+            autocomplete="name"
+            maxlength="80"
+            aria-describedby="custom-name-error"
+          />
+          <p id="custom-name-error" class="field-error" data-error-for="name"></p>
+        </div>
+        <div class="field">
+          <label for="custom-type">What would you like?</label>
+          <select id="custom-type" name="pieceType" class="input">
+            {pieceTypes.map((type) => <option>{type}</option>)}
+          </select>
+        </div>
+        <div class="field span-2">
+          <label for="custom-idea">Describe your idea</label>
+          <textarea
+            id="custom-idea"
+            name="idea"
+            class="input"
+            rows="5"
+            maxlength="1000"
+            placeholder="E.g. a bunny like the Carrot Bunny, in lilac, with a name stitched on its tummy"
+            aria-describedby="custom-idea-error"></textarea>
+          <p id="custom-idea-error" class="field-error" data-error-for="idea"></p>
+        </div>
+        <div class="field">
+          <label for="custom-colours">Colours <span class="optional">(optional)</span></label>
+          <input id="custom-colours" name="colours" class="input" maxlength="120" placeholder="Lilac, cream and a little yellow" />
+        </div>
+        <div class="field">
+          <label for="custom-size">Size <span class="optional">(optional)</span></label>
+          <input id="custom-size" name="size" class="input" maxlength="120" placeholder="About 25 cm tall" />
+        </div>
+        <div class="field">
+          <label for="custom-date">Needed by <span class="optional">(optional)</span></label>
+          <input id="custom-date" name="neededBy" type="date" class="input" />
+        </div>
+        <div class="field">
+          <label for="custom-budget">Budget</label>
+          <select id="custom-budget" name="budget" class="input">
+            {budgets.map((budget) => <option>{budget}</option>)}
+          </select>
+        </div>
+      </div>
+
+      <button class="btn btn-primary" type="submit">
+        <WhatsAppIcon />
+        Send request on WhatsApp
+      </button>
+      <p class="form-note" data-form-status hidden>
+        WhatsApp should open with your request ready to send. Didn't open?
+        <a class="text-link" data-status-link href={whatsappLink()} target="_blank" rel="noopener">Send it on WhatsApp</a>.
+      </p>
+    </form>
+  </section>
+</BaseLayout>
+
+<style>
+  .custom-photo :global(.custom-img) {
+    width: 100%;
+    aspect-ratio: 1;
+    object-fit: cover;
+    border-radius: var(--radius-lg);
+  }
+
+  .steps-title {
+    margin-bottom: clamp(1.5rem, 1rem + 2vw, 2.5rem);
+  }
+
+  .custom-form-section {
+    display: grid;
+    align-items: start;
+    gap: 2.5rem;
+    scroll-margin-top: calc(var(--header-h) + 1rem);
+  }
+
+  @media (min-width: 60rem) {
+    .custom-form-section {
+      grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+      gap: 4rem;
+    }
+  }
+
+  .custom-form-intro {
+    display: grid;
+    gap: 1rem;
+  }
+
+  .custom-form-intro > p {
+    font-size: var(--text-lg);
+    color: var(--ink-soft);
+  }
+
+  .custom-faq {
+    margin-top: 0.75rem;
+    border-top: 1px solid var(--line);
+  }
+
+  .custom-form {
+    display: grid;
+    gap: 1.25rem;
+    padding: clamp(1.25rem, 1rem + 1vw, 2rem);
+    border-radius: var(--radius-lg);
+    background: var(--paper);
+  }
+
+  .custom-form .btn {
+    justify-self: start;
+  }
+
+  .like-note {
+    padding: 0.7rem 1rem;
+    border-radius: var(--radius-sm);
+    background: var(--berry-soft);
+    color: var(--berry-deep);
+    font-size: var(--text-sm);
+  }
+</style>
+
+<script>
+  import { site } from '../site.config';
+  import { setupEnquiryForm } from '../scripts/enquiry';
+
+  const form = document.querySelector<HTMLFormElement>('[data-custom-form]');
+
+  if (form) {
+    const names: Record<string, string> = JSON.parse(form.dataset.productNames ?? '{}');
+    const like = new URLSearchParams(location.search).get('like');
+    if (like && names[like]) {
+      form.querySelector<HTMLElement>('[data-like-note]')!.hidden = false;
+      form.querySelector('[data-like-name]')!.textContent = names[like];
+      (form.elements.namedItem('like') as HTMLInputElement).value = names[like];
+    }
+
+    const neededBy = form.elements.namedItem('neededBy') as HTMLInputElement;
+    neededBy.min = new Date().toISOString().slice(0, 10);
+
+    setupEnquiryForm(form, {
+      rules: [
+        { name: 'name', check: (value) => (value.length >= 2 ? '' : 'Please enter your name.') },
+        { name: 'idea', check: (value) => (value.length >= 10 ? '' : 'Tell us a little more about your idea.') },
+      ],
+      message: (data) => {
+        const get = (key: string) => String(data.get(key) ?? '').trim();
+        const lines = [`Hi ${site.name}! I'd like a custom piece.`, '', `Type: ${get('pieceType')}`];
+        if (get('like')) lines.push(`Inspired by: ${get('like')}`);
+        lines.push(`Idea: ${get('idea')}`);
+        if (get('colours')) lines.push(`Colours: ${get('colours')}`);
+        if (get('size')) lines.push(`Size: ${get('size')}`);
+        if (get('neededBy')) {
+          const date = new Date(`${get('neededBy')}T12:00:00`);
+          lines.push(`Needed by: ${date.toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })}`);
+        }
+        lines.push(`Budget: ${get('budget')}`, '', `– ${get('name')}`);
+        return lines.join('\n');
+      },
+    });
+  }
+</script>

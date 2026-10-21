@@ -1,0 +1,294 @@
+---
+import PageHeader from '../components/PageHeader.astro';
+import WhatsAppIcon from '../components/WhatsAppIcon.astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { site } from '../site.config';
+
+const sendsViaWhatsApp = site.orderMode === 'whatsapp';
+---
+
+<BaseLayout title="Your cart" noindex showWhatsApp={false}>
+  <PageHeader title="Your cart" colour="marigold">
+    <p class="page-lede">Check your pieces, add your details and send your order request. No payment now.</p>
+  </PageHeader>
+
+  <div class="wrap cart-page" data-cart-page>
+
+    <p class="cart-loading" data-cart-loading>Loading your cart…</p>
+
+    <div class="cart-empty" data-cart-empty hidden>
+      <div class="chain cart-empty-chain" aria-hidden="true"></div>
+      <h2 class="display cart-empty-title">Your cart is empty</h2>
+      <p>Find something soft to fill it.</p>
+      <a class="btn btn-primary" href="/shop/">Browse the shop</a>
+    </div>
+
+    <div class="cart-layout" data-cart-layout hidden>
+      <div class="cart-main">
+        <section class="cart-block" aria-labelledby="pieces-title">
+          <h2 id="pieces-title" class="block-title">Pieces <span class="block-count" data-items-count></span></h2>
+          <p class="notice" data-unavailable-notice hidden>
+            Some pieces are no longer available. Remove them to send your order.
+          </p>
+          <ul class="cart-lines" data-cart-lines></ul>
+        </section>
+
+        <form id="checkout-form" class="cart-block checkout" data-checkout-form novalidate>
+          <h2 class="block-title">Your details</h2>
+
+          <div class="form-grid">
+            <div class="field span-2">
+              <label for="name">Full name</label>
+              <input id="name" name="name" class="input" autocomplete="name" maxlength="80" aria-describedby="name-error" />
+              <p id="name-error" class="field-error" data-error-for="name"></p>
+            </div>
+            <div class="field">
+              <label for="whatsapp">WhatsApp number</label>
+              <input
+                id="whatsapp"
+                name="whatsapp"
+                class="input"
+                type="tel"
+                inputmode="tel"
+                autocomplete="tel"
+                placeholder="98765 43210"
+                maxlength="16"
+                aria-describedby="whatsapp-hint whatsapp-error"
+              />
+              <p id="whatsapp-hint" class="hint">We'll confirm your order on this number.</p>
+              <p id="whatsapp-error" class="field-error" data-error-for="whatsapp"></p>
+            </div>
+            <div class="field">
+              <label for="email">Email <span class="optional">(optional)</span></label>
+              <input
+                id="email"
+                name="email"
+                class="input"
+                type="email"
+                autocomplete="email"
+                maxlength="120"
+                aria-describedby="email-error"
+              />
+              <p id="email-error" class="field-error" data-error-for="email"></p>
+            </div>
+          </div>
+
+          {
+            site.pickup.enabled && (
+              <fieldset class="field">
+                <legend>Delivery</legend>
+                <div class="pills">
+                  <label class="pill">
+                    <input type="radio" name="delivery" value="ship" checked />
+                    <span>Ship to me</span>
+                  </label>
+                  <label class="pill">
+                    <input type="radio" name="delivery" value="pickup" />
+                    <span>I'll pick it up</span>
+                  </label>
+                </div>
+                <p class="hint">{site.pickup.note}</p>
+              </fieldset>
+            )
+          }
+
+          <div class="form-grid" data-address-fields>
+            <div class="field span-2">
+              <label for="address">Delivery address</label>
+              <textarea
+                id="address"
+                name="address"
+                class="input"
+                rows="3"
+                autocomplete="street-address"
+                maxlength="300"
+                aria-describedby="address-error"></textarea>
+              <p id="address-error" class="field-error" data-error-for="address"></p>
+            </div>
+            <div class="field">
+              <label for="city">Town or city</label>
+              <input
+                id="city"
+                name="city"
+                class="input"
+                autocomplete="address-level2"
+                maxlength="60"
+                aria-describedby="city-error"
+              />
+              <p id="city-error" class="field-error" data-error-for="city"></p>
+            </div>
+            <div class="field">
+              <label for="pincode">PIN code</label>
+              <input
+                id="pincode"
+                name="pincode"
+                class="input"
+                inputmode="numeric"
+                autocomplete="postal-code"
+                maxlength="6"
+                aria-describedby="pincode-error"
+              />
+              <p id="pincode-error" class="field-error" data-error-for="pincode"></p>
+            </div>
+          </div>
+
+          <label class="check">
+            <input type="checkbox" name="isGift" data-gift-toggle />
+            <span>This is a gift</span>
+          </label>
+          <div class="field" data-gift-note hidden>
+            <label for="giftNote">Gift note <span class="optional">(we'll write it on a little card)</span></label>
+            <textarea id="giftNote" name="giftNote" class="input" rows="2" maxlength="200"></textarea>
+          </div>
+
+          <div class="field">
+            <label for="notes">Anything else? <span class="optional">(optional)</span></label>
+            <textarea
+              id="notes"
+              name="notes"
+              class="input"
+              rows="3"
+              maxlength="500"
+              placeholder="A date you need it by, colour questions…"></textarea>
+          </div>
+
+          <div class="field">
+            <label class="check">
+              <input type="checkbox" name="consent" aria-describedby="consent-error" />
+              <span>I'm happy to be contacted on WhatsApp about this order.</span>
+            </label>
+            <p id="consent-error" class="field-error" data-error-for="consent"></p>
+          </div>
+        </form>
+      </div>
+
+      <aside class="cart-summary" aria-labelledby="summary-title">
+        <h2 id="summary-title" class="block-title">Order summary</h2>
+        <dl class="summary-rows">
+          <div>
+            <dt>Subtotal</dt>
+            <dd data-subtotal></dd>
+          </div>
+          <div>
+            <dt>Shipping</dt>
+            <dd>Confirmed on WhatsApp</dd>
+          </div>
+        </dl>
+        <button type="submit" form="checkout-form" class="btn btn-primary btn-block" data-submit>
+          {
+            sendsViaWhatsApp ? (
+              <Fragment>
+                <WhatsAppIcon />
+                Send order on WhatsApp
+              </Fragment>
+            ) : (
+              'Send order request'
+            )
+          }
+        </button>
+        <p class="form-status" data-form-status role="alert"></p>
+        <p class="summary-note">
+          {sendsViaWhatsApp && 'WhatsApp opens with your order ready to send. '}
+          We confirm availability and shipping first, then you pay by {site.payment}.
+        </p>
+      </aside>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .cart-page {
+    padding-top: clamp(2.25rem, 1.75rem + 2vw, 3.25rem);
+  }
+
+  .cart-loading {
+    color: var(--muted);
+  }
+
+  .cart-empty {
+    display: grid;
+    justify-items: center;
+    gap: 0.9rem;
+    padding: clamp(2.5rem, 2rem + 4vw, 5rem) 1rem;
+    border-radius: var(--radius-lg);
+    background: var(--berry-soft);
+    color: var(--ink-soft);
+    text-align: center;
+  }
+
+  .cart-empty-chain {
+    width: 8.75rem;
+  }
+
+  .cart-empty-title {
+    font-size: var(--text-2xl);
+    color: var(--ink);
+  }
+
+  .cart-layout {
+    display: grid;
+    align-items: start;
+    gap: 2rem;
+  }
+
+  @media (min-width: 60rem) {
+    .cart-layout {
+      grid-template-columns: minmax(0, 1fr) minmax(18rem, 23rem);
+      gap: clamp(2rem, 1rem + 3vw, 4rem);
+    }
+
+    .cart-summary {
+      position: sticky;
+      top: calc(var(--header-h) + 1.5rem);
+    }
+  }
+
+  .cart-main {
+    display: grid;
+    gap: 2.5rem;
+  }
+
+  .cart-block {
+    display: grid;
+    gap: 1.1rem;
+  }
+
+  .block-count {
+    font-size: var(--text-sm);
+    font-weight: 500;
+    color: var(--muted);
+  }
+
+  .checkout {
+    padding-top: 2rem;
+    border-top: 1px solid var(--line);
+  }
+
+  .cart-summary {
+    display: grid;
+    gap: 1rem;
+    padding: 1.4rem;
+    border-radius: var(--radius-lg);
+    background: var(--paper);
+  }
+
+  .form-status {
+    font-size: var(--text-sm);
+    font-weight: 700;
+    color: var(--danger);
+  }
+
+  .form-status:empty {
+    display: none;
+  }
+
+  .summary-note {
+    font-size: var(--text-xs);
+    line-height: 1.5;
+    color: var(--muted);
+  }
+</style>
+
+<script>
+  import '../scripts/checkout';
+</script>

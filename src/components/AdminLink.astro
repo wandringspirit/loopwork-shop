@@ -1,0 +1,23 @@
+<a class="admin-link" href="/admin">Manage shop</a>
+
+<style>
+  /* Only rendered by `npm run dev` (see BaseLayout), never on the live site. */
+  .admin-link {
+    position: fixed;
+    left: 1rem;
+    bottom: calc(1rem + env(safe-area-inset-bottom));
+    z-index: 35;
+    padding: 0.5rem 0.95rem;
+    border-radius: 999px;
+    background: var(--ink);
+    color: var(--cotton);
+    font-size: var(--text-xs);
+    font-weight: 700;
+    text-decoration: none;
+    box-shadow: var(--shadow-lift);
+  }
+
+  .admin-link:hover {
+    background: var(--berry);
+  }
+</style>

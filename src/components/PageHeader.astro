@@ -1,0 +1,57 @@
+---
+import type { YarnColour } from '../lib/yarn';
+
+interface Props {
+  title: string;
+  colour: YarnColour;
+  eyebrow?: string;
+}
+
+// The coloured band at the top of a page, finished with a scalloped edge.
+// An intro or a button goes in the default slot; a photo can go in the "aside" slot.
+const { title, colour, eyebrow } = Astro.props;
+const hasAside = Astro.slots.has('aside');
+---
+
+<header class:list={['page-header', 'band', 'scallop-bottom', `yarn-${colour}`]}>
+  <div class:list={['wrap', 'page-header-inner', { 'has-aside': hasAside }]}>
+    <div class="page-header-copy">
+      {eyebrow && <p class="eyebrow">{eyebrow}</p>}
+      <h1 class="display page-title">{title}</h1>
+      <slot />
+    </div>
+    {
+      hasAside && (
+        <div class="page-header-aside">
+          <slot name="aside" />
+        </div>
+      )
+    }
+  </div>
+</header>
+
+<style>
+  .page-header {
+    padding-block: clamp(2rem, 1.25rem + 3vw, 4rem);
+  }
+
+  .page-header-inner {
+    display: grid;
+    align-items: center;
+    gap: 2rem;
+  }
+
+  @media (min-width: 60rem) {
+    .has-aside {
+      grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
+      gap: 4rem;
+    }
+  }
+
+  .page-header-copy {
+    display: grid;
+    justify-items: start;
+    gap: 0.9rem;
+    max-width: 48rem;
+  }
+</style>

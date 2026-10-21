@@ -1,0 +1,26 @@
+# Shop categories, in the order they appear. Products refer to these by id.
+# colour is one of: berry, coral, marigold, mint, teal, lilac.
+- id: amigurumi
+  name: Amigurumi
+  description: Little crocheted friends to cuddle, gift or keep on a shelf.
+  order: 1
+  colour: berry
+  coverProduct: penguin-pals
+- id: bags
+  name: Bags & charms
+  description: Totes, minis and charms made to be carried every day.
+  order: 2
+  colour: marigold
+  coverProduct: honey-posy-bag
+- id: wearables
+  name: Wearables
+  description: Hats and layers with a handmade, one-of-a-kind feel.
+  order: 3
+  colour: teal
+  coverProduct: frog-beanie
+- id: home
+  name: Home
+  description: Flowers that never wilt, blankets and small comforts for your space.
+  order: 4
+  colour: mint
+  coverProduct: forget-me-not-stems

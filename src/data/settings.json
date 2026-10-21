@@ -1,0 +1,43 @@
+{
+  "name": "Loopwork",
+  "tagline": "Soft things, made one loop at a time.",
+  "description": "Handmade crochet toys, bags, wearables and homeware. Send an order request and pay once we confirm on WhatsApp.",
+  "url": "https://loopwork.leadspilot.co",
+  "whatsappNumber": "910000000000",
+  "email": "hello@example.com",
+  "instagramUrl": "https://www.instagram.com/",
+  "instagramHandle": "@loopwork",
+  "payment": "UPI or bank transfer",
+  "replyTime": "within a day",
+  "orderIdPrefix": "ORD",
+  "maxQtyPerItem": 10,
+  "shipping": {
+    "area": "across India",
+    "dispatch": "Ready-to-ship pieces leave within 3 working days.",
+    "transit": "Most parcels arrive 4–7 working days after dispatch.",
+    "charges": "Shipping is worked out from your PIN code and confirmed on WhatsApp before you pay."
+  },
+  "pickup": {
+    "enabled": false,
+    "note": "Pick up from our studio. We’ll share the address on WhatsApp."
+  },
+  "sitePhotos": {
+    "hero": {
+      "alt": "Cream crochet bunny holding a carrot beside a lilac vase of crochet sunflowers",
+      "sample": true
+    },
+    "about": {
+      "alt": "Skeins of mint and cream cotton yarn and a crochet hook resting on a ripple blanket",
+      "sample": true
+    },
+    "custom": {
+      "alt": "Pink crochet coaster tied with a ribbon on a thank-you card, surrounded by yarn and crochet hooks",
+      "sample": true
+    }
+  },
+  "demo": {
+    "enabled": true,
+    "sellerName": "",
+    "sellerWhatsapp": "910000000000"
+  }
+}

@@ -1,0 +1,58 @@
+# DRAFT answers: check they match how you really work before launch.
+- id: how-to-order
+  group: Ordering
+  question: How do I place an order?
+  answer: Add the pieces you like to your cart, fill in your details and send your order request. We reply on WhatsApp to confirm availability, shipping and the total before you pay anything.
+  onHome: true
+
+- id: made-to-order
+  group: Ordering
+  question: What does “made to order” mean?
+  answer: We start making the piece once your order is confirmed. Each product shows how long that usually takes, and we confirm the date with you before you pay.
+  onHome: true
+
+- id: change-order
+  group: Ordering
+  question: Can I change my order after sending it?
+  answer: Yes. Just reply on WhatsApp before you pay and we'll update it.
+
+- id: when-to-pay
+  group: Payment
+  question: When and how do I pay?
+  answer: Only after we confirm your order on WhatsApp. We send you the total including shipping, and you pay by UPI or bank transfer. There's no payment on the website.
+  onHome: true
+
+- id: where-ship
+  group: Shipping
+  question: Where do you ship?
+  answer: We ship across India. Shipping charges depend on your PIN code and the size of your parcel, and we confirm them before you pay.
+
+- id: delivery-time
+  group: Shipping
+  question: How long does delivery take?
+  answer: Ready-to-ship pieces leave within 3 working days of payment, and most parcels arrive 4–7 working days after that. Made-to-order pieces ship as soon as they're finished.
+
+- id: custom-possible
+  group: Custom orders
+  question: Can you make something custom?
+  answer: Often, yes. A different colour, a name, or a piece made from your own idea. Send a custom order request and we'll talk it through on WhatsApp.
+
+- id: custom-time
+  group: Custom orders
+  question: How long do custom pieces take?
+  answer: It depends on the piece. Small items can take about a week, while blankets and garments take longer. You'll get a timeline before you commit.
+
+- id: washing
+  group: Care
+  question: How do I wash crochet pieces?
+  answer: Every product lists its own care instructions. Most pieces prefer a gentle hand wash in cold water and drying flat, away from direct sun.
+
+- id: toy-safety
+  group: Care
+  question: Are the toys safe for babies?
+  answer: Toys have securely fixed or embroidered eyes, but they aren't designed for children under 3 unless the product says so. Please supervise little ones.
+
+- id: returns
+  group: Returns
+  question: Can I return a piece?
+  answer: Because every piece is handmade, we don't accept returns for a change of mind. If your parcel arrives damaged, message us within 48 hours with photos and we'll make it right.

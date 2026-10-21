@@ -1,0 +1,160 @@
+---
+import { getCollection } from 'astro:content';
+import PageHeader from '../components/PageHeader.astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import type { YarnColour } from '../lib/yarn';
+import { site } from '../site.config';
+
+const groupOrder = ['Ordering', 'Payment', 'Shipping', 'Custom orders', 'Care', 'Returns'] as const;
+const groupColours: Record<(typeof groupOrder)[number], YarnColour> = {
+  Ordering: 'berry',
+  Payment: 'marigold',
+  Shipping: 'teal',
+  'Custom orders': 'lilac',
+  Care: 'mint',
+  Returns: 'coral',
+};
+
+const faqs = await getCollection('faq');
+const groups = groupOrder
+  .map((group) => ({
+    group,
+    id: group.toLowerCase().replace(/\s+/g, '-'),
+    colour: groupColours[group],
+    items: faqs.filter((item) => item.data.group === group),
+  }))
+  .filter((group) => group.items.length > 0);
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: faqs.map((item) => ({
+    '@type': 'Question',
+    name: item.data.question,
+    acceptedAnswer: { '@type': 'Answer', text: item.data.answer },
+  })),
+};
+---
+
+<BaseLayout
+  title="FAQ"
+  description={`Answers about ordering, payment, shipping, custom orders and care at ${site.name}.`}
+  jsonLd={jsonLd}
+>
+  <PageHeader title="Questions, answered" eyebrow="FAQ" colour="coral">
+    <p class="page-lede">
+      Can't find what you're looking for? <a class="text-link" href="/contact/">Message us</a> and we'll reply
+      {site.replyTime}.
+    </p>
+  </PageHeader>
+
+  <div class="wrap faq-page">
+    <div class="faq-layout">
+      <nav class="faq-nav" aria-label="FAQ topics">
+        <ul role="list">
+          {
+            groups.map((group) => (
+              <li>
+                <a class:list={['yarn-dot', `yarn-${group.colour}`]} href={`#${group.id}`}>
+                  {group.group}
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </nav>
+
+      <div class="faq-groups">
+        {
+          groups.map((group) => (
+            <section id={group.id} class:list={['faq-group', `yarn-${group.colour}`]} aria-labelledby={`${group.id}-title`}>
+              <h2 id={`${group.id}-title`} class="faq-group-title yarn-dot">
+                {group.group}
+              </h2>
+              <div class="faq-list">
+                {group.items.map((item) => (
+                  <details class="faq-item">
+                    <summary>{item.data.question}</summary>
+                    <p>{item.data.answer}</p>
+                  </details>
+                ))}
+              </div>
+            </section>
+          ))
+        }
+      </div>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .faq-page {
+    padding-top: clamp(2.5rem, 2rem + 2vw, 3.5rem);
+  }
+
+  .faq-layout {
+    display: grid;
+    align-items: start;
+    gap: 2rem;
+  }
+
+  .faq-nav ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .faq-nav a {
+    display: inline-flex;
+    padding: 0.45rem 0.9rem;
+    border-radius: 999px;
+    background: var(--paper);
+    font-size: var(--text-sm);
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  .faq-nav a:hover {
+    color: var(--yarn-deep);
+  }
+
+  @media (min-width: 60rem) {
+    .faq-layout {
+      grid-template-columns: 12rem minmax(0, 1fr);
+      gap: 4rem;
+    }
+
+    .faq-nav {
+      position: sticky;
+      top: calc(var(--header-h) + 1.5rem);
+    }
+
+    .faq-nav ul {
+      flex-direction: column;
+      gap: 0.15rem;
+    }
+
+    .faq-nav a {
+      padding: 0.4rem 0;
+      background: none;
+    }
+  }
+
+  .faq-groups {
+    display: grid;
+    gap: 2.75rem;
+    max-width: 50rem;
+  }
+
+  .faq-group-title {
+    display: flex;
+    margin-bottom: 0.5rem;
+    font-family: var(--font-display);
+    font-size: var(--text-xl);
+    font-weight: 400;
+  }
+
+  .faq-list {
+    border-top: 1px solid var(--line);
+  }
+</style>

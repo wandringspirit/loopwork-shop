@@ -1,0 +1,49 @@
+---
+// Shown instead of PreviewBanner while settings.demo.enabled is on: the whole site is a demo
+// for handmade sellers, and this bar sends them to the offer page.
+---
+
+<p class="demo-banner">
+  <strong>Demo shop</strong>
+  <span>A sample shop for handmade sellers.</span>
+  <a href="/for-sellers/">Get one for your brand <span aria-hidden="true">→</span></a>
+</p>
+
+<style>
+  .demo-banner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem 0.6rem;
+    padding: 0.5rem var(--gutter);
+    background: var(--plum);
+    color: var(--cotton);
+    font-size: var(--text-xs);
+    line-height: 1.35;
+    text-align: center;
+  }
+
+  strong {
+    padding: 0.05rem 0.5rem;
+    border-radius: 999px;
+    background: var(--marigold-soft);
+    color: var(--marigold);
+    font-size: 0.7rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  a {
+    color: var(--marigold-bright);
+    font-weight: 700;
+    text-underline-offset: 0.2em;
+  }
+
+  /* On narrow phones keep the bar to one line: the link says enough. */
+  @media (max-width: 26rem) {
+    span:not([aria-hidden]) {
+      display: none;
+    }
+  }
+</style>

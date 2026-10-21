@@ -1,0 +1,28 @@
+# build output
+dist/
+.astro/
+.wrangler/
+
+# dependencies
+node_modules/
+
+# products, photos and page photos removed in the shop admin (kept so they can be restored)
+.trash/
+
+# logs
+npm-debug.log*
+
+# environment variables and secrets
+.env
+.env.*
+.dev.vars*
+!.env.example
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/*
+!.vscode/extensions.json
+
+# client copies made by `npm run starter`
+release/

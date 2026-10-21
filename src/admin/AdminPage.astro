@@ -1,0 +1,1300 @@
+---
+// Local shop admin. Injected by integrations/local-admin only while `npm run dev` runs.
+import '@fontsource/caprasimo/400.css';
+import '@fontsource-variable/hanken-grotesk';
+import '../styles/global.css';
+import Logo from '../components/Logo.astro';
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <title>Shop admin · Loopwork</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  </head>
+  <body class="admin-body">
+    <div class="admin" x-data="shopAdmin">
+      <header class="admin-top">
+        <a class="admin-brand" href="/admin#products">
+          <Logo id="admin-logo" />
+          <span class="admin-badge">Shop admin</span>
+        </a>
+        <p class="admin-note">Only on this computer. Changes go live when you deploy.</p>
+        <a class="btn btn-quiet btn-sm" href="/" target="_blank" rel="noopener">View shop ↗</a>
+      </header>
+
+      <nav class="admin-nav" aria-label="Admin sections">
+        <template x-for="section in sections" x-bind:key="section.id">
+          <button
+            type="button"
+            class="nav-item"
+            x-bind:class="{ 'is-active': view === section.id }"
+            x-bind:aria-current="view === section.id ? 'page' : null"
+            x-on:click="go(section.id)"
+          >
+            <span x-text="section.label"></span>
+            <span class="nav-count" x-show="section.id === 'publish' && problems > 0" x-text="problems"></span>
+          </button>
+        </template>
+      </nav>
+
+      <main class="admin-main">
+        <p class="admin-message" x-show="loading">Loading your shop…</p>
+        <p class="form-error" role="alert" x-show="loadError" x-text="loadError" x-cloak></p>
+
+        <div x-show="!loading && !loadError" x-cloak>
+          <!-- ============ Products ============ -->
+          <section class="view" x-show="view === 'products' && !product" aria-labelledby="products-title">
+            <div class="view-head">
+              <div>
+                <h1 id="products-title" class="view-title">Products</h1>
+                <p
+                  class="view-lede"
+                  x-text="`${products.length} products: ${count('available')} ready to ship, ${count('made-to-order')} made to order, ${count('sold-out')} sold out, ${count('hidden')} hidden`"
+                >
+                </p>
+              </div>
+              <button type="button" class="btn btn-primary" x-on:click="startCreate()">Add product</button>
+            </div>
+
+            <div class="filters">
+              <input class="input" type="search" placeholder="Search by name" aria-label="Search products" x-model="search" />
+              <select class="input" aria-label="Filter by category" x-model="categoryFilter">
+                <option value="">All categories</option>
+                <template x-for="category in categories" x-bind:key="category.id">
+                  <option x-bind:value="category.id" x-text="category.name"></option>
+                </template>
+              </select>
+              <select class="input" aria-label="Filter by status" x-model="statusFilter">
+                <option value="">Any status</option>
+                <template x-for="(label, value) in statusLabels" x-bind:key="value">
+                  <option x-bind:value="value" x-text="label"></option>
+                </template>
+              </select>
+            </div>
+
+            <div class="table">
+              <div class="table-row table-head" aria-hidden="true">
+                <span>Product</span><span>Price</span><span>Status</span><span>Home page</span><span></span>
+              </div>
+              <template x-for="item in filteredProducts" x-bind:key="item.id">
+                <div class="table-row" x-bind:class="{ 'is-hidden': item.status === 'hidden' }">
+                  <span class="cell-product">
+                    <img alt="" width="56" height="70" loading="lazy" x-bind:src="photoUrl(item.id, item.photos[0].src, 160)" />
+                    <span>
+                      <strong x-text="item.name"></strong>
+                      <small x-text="categoryName(item.category) + (item.sample ? ' · sample photos' : '')"></small>
+                    </span>
+                  </span>
+                  <span class="cell-price" x-text="money(item.price)"></span>
+                  <span>
+                    <select
+                      class="input input-sm"
+                      x-bind:aria-label="`Status of ${item.name}`"
+                      x-on:change="quickUpdate(item, { status: $event.target.value }, `${item.name}: ${statusLabels[$event.target.value]}`)"
+                    >
+                      <template x-for="(label, value) in statusLabels" x-bind:key="value">
+                        <option x-bind:value="value" x-text="label" x-bind:selected="value === item.status"></option>
+                      </template>
+                    </select>
+                  </span>
+                  <label class="check switch">
+                    <input
+                      type="checkbox"
+                      x-bind:checked="Boolean(item.featured)"
+                      x-on:change="quickUpdate(item, { featured: $event.target.checked }, $event.target.checked ? `${item.name} now shows on the home page` : `${item.name} no longer shows on the home page`)"
+                    />
+                    <span>Featured</span>
+                  </label>
+                  <span class="cell-actions">
+                    <button type="button" class="btn btn-quiet btn-sm" x-on:click="editProduct(item.id)">Edit</button>
+                  </span>
+                </div>
+              </template>
+              <p class="empty" x-show="filteredProducts.length === 0">No products match your search.</p>
+            </div>
+          </section>
+
+          <!-- ============ Product editor ============ -->
+          <section class="view" x-show="view === 'products' && product" aria-labelledby="editor-title">
+            <template x-if="product">
+              <div class="stack">
+                <div class="editor-bar">
+                  <button type="button" class="btn btn-quiet btn-sm" x-on:click="closeProduct()">← All products</button>
+                  <h1 id="editor-title" class="view-title" x-text="product.name || 'Untitled product'"></h1>
+                  <div class="head-actions">
+                    <span class="unsaved" x-show="productDirty">Unsaved changes</span>
+                    <a
+                      class="btn btn-quiet btn-sm"
+                      target="_blank"
+                      rel="noopener"
+                      x-show="product.status !== 'hidden'"
+                      x-bind:href="`/shop/${product.id}/`">View in shop ↗</a
+                    >
+                    <button type="button" class="btn btn-primary" x-bind:disabled="busy || !productDirty" x-on:click="saveProduct()">
+                      Save changes
+                    </button>
+                  </div>
+                </div>
+
+                <p class="form-error" role="alert" x-show="productError" x-text="productError"></p>
+
+                <div class="editor-grid">
+                  <section class="card">
+                    <h2 class="card-title">Basics</h2>
+                    <label class="field"><span>Name</span><input class="input" maxlength="60" x-model="product.name" /></label>
+                    <label class="field">
+                      <span>Short summary</span>
+                      <textarea class="input" rows="3" maxlength="180" x-model="product.summary"></textarea>
+                      <small x-text="`${product.summary.length} of 180 characters. Shown under the name and in link previews.`"></small>
+                    </label>
+                    <div class="field-row">
+                      <label class="field"><span>Price (₹)</span><input class="input" inputmode="numeric" x-model="product.price" /></label>
+                      <label class="field">
+                        <span>Category</span>
+                        <select class="input" x-model="product.category">
+                          <template x-for="category in categories" x-bind:key="category.id">
+                            <option x-bind:value="category.id" x-text="category.name" x-bind:selected="category.id === product.category"></option>
+                          </template>
+                        </select>
+                      </label>
+                    </div>
+                    <div class="field-row">
+                      <label class="field">
+                        <span>Status</span>
+                        <select class="input" x-model="product.status">
+                          <template x-for="(label, value) in statusLabels" x-bind:key="value">
+                            <option x-bind:value="value" x-text="label" x-bind:selected="value === product.status"></option>
+                          </template>
+                        </select>
+                      </label>
+                      <label class="field">
+                        <span>Lead time</span>
+                        <input class="input" placeholder="Ships in 2–3 days" x-model="product.leadTime" />
+                      </label>
+                    </div>
+                    <div class="field-row">
+                      <label class="field">
+                        <span>Position in the shop</span>
+                        <input class="input" inputmode="numeric" x-model="product.sortOrder" />
+                        <small>Lower numbers show first.</small>
+                      </label>
+                      <label class="check"><input type="checkbox" x-model="product.featured" /><span>Show on the home page</span></label>
+                    </div>
+                  </section>
+
+                  <section class="card">
+                    <h2 class="card-title">Details &amp; care</h2>
+                    <label class="field"><span>Size</span><input class="input" placeholder="About 18 cm tall" x-model="product.size" /></label>
+                    <label class="field"><span>Yarn and materials</span><input class="input" x-model="product.materials" /></label>
+                    <label class="field"><span>Care instructions</span><input class="input" x-model="product.care" /></label>
+                    <div class="field">
+                      <span>Care symbols</span>
+                      <div class="care-grid">
+                        <template x-for="(label, value) in careLabels" x-bind:key="value">
+                          <label class="check"><input type="checkbox" x-bind:value="value" x-model="product.careSymbols" /><span x-text="label"></span></label>
+                        </template>
+                      </div>
+                    </div>
+
+                    <h2 class="card-title">Choices for customers</h2>
+                    <p class="hint">For example “Colour” with “Peach, Blush pink, Lilac”. Leave this empty if there’s nothing to choose.</p>
+                    <template x-for="(option, index) in product.options" x-bind:key="index">
+                      <div class="option-row">
+                        <input class="input input-sm" placeholder="Colour" aria-label="Choice name" x-model="option.name" />
+                        <input
+                          class="input input-sm"
+                          placeholder="Peach, Blush pink, Lilac"
+                          aria-label="Options, separated by commas"
+                          x-model="option.valuesText"
+                        />
+                        <button type="button" class="btn btn-quiet btn-sm danger" x-on:click="product.options.splice(index, 1)">Remove</button>
+                      </div>
+                    </template>
+                    <button type="button" class="btn btn-quiet btn-sm" x-on:click="product.options.push({ name: '', valuesText: '' })">
+                      Add a choice
+                    </button>
+                  </section>
+
+                  <section class="card card-wide">
+                    <h2 class="card-title">Photos</h2>
+                    <p class="hint">
+                      The first photo is the main one. Click a photo to choose which part stays in view when it’s cropped, and describe each
+                      photo for people who can’t see it.
+                    </p>
+                    <div class="photo-grid">
+                      <template x-for="(photo, index) in product.photos" x-bind:key="photo.src">
+                        <div class="photo-card">
+                          <div class="photo-frame" title="Click to set the focus point" x-on:click="setFocus(photo, $event)">
+                            <img alt="" x-bind:src="photoUrl(product.id, photo.src, 480)" />
+                            <span class="focus-dot" x-bind:style="focusStyle(photo)"></span>
+                          </div>
+                          <label class="field">
+                            <span x-text="index === 0 ? 'Main photo' : `Photo ${index + 1}`"></span>
+                            <input class="input input-sm" placeholder="What does the photo show?" x-model="photo.alt" />
+                          </label>
+                          <div class="photo-actions">
+                            <button
+                              type="button"
+                              class="btn btn-quiet btn-sm"
+                              aria-label="Move photo earlier"
+                              x-bind:disabled="index === 0"
+                              x-on:click="moveItem(product.photos, index, -1)">←</button
+                            >
+                            <button
+                              type="button"
+                              class="btn btn-quiet btn-sm"
+                              aria-label="Move photo later"
+                              x-bind:disabled="index === product.photos.length - 1"
+                              x-on:click="moveItem(product.photos, index, 1)">→</button
+                            >
+                            <button type="button" class="btn btn-quiet btn-sm danger" x-on:click="removePhoto(photo)">Remove</button>
+                          </div>
+                        </div>
+                      </template>
+                      <label
+                        class="photo-drop"
+                        x-on:dragover="$event.preventDefault()"
+                        x-on:drop="$event.preventDefault(); uploadPhotos($event.dataTransfer.files)"
+                      >
+                        <input
+                          type="file"
+                          class="visually-hidden"
+                          accept="image/jpeg,image/png,image/webp"
+                          multiple
+                          x-on:change="uploadPhotos($event.target.files); $event.target.value = ''"
+                        />
+                        <strong x-text="busy ? 'Uploading…' : 'Add photos'"></strong>
+                        <span>Drop photos here or click to choose. JPG, PNG or WebP.</span>
+                      </label>
+                    </div>
+                    <label class="check">
+                      <input type="checkbox" x-model="product.sample" />
+                      <span>These are sample photos. The live site won’t publish until they’re replaced.</span>
+                    </label>
+                  </section>
+
+                  <section class="card card-wide">
+                    <h2 class="card-title">Description</h2>
+                    <p class="hint">Shown under “About this piece”. Leave a blank line between paragraphs. Put ** around words to make them bold.</p>
+                    <textarea class="input" rows="7" aria-label="Description" x-model="product.body"></textarea>
+                  </section>
+                </div>
+
+                <div class="danger-zone">
+                  <button type="button" class="btn btn-quiet danger" x-on:click="deleteProduct()">Move to bin</button>
+                  <p>Takes the product off the site. To pause it for a while instead, set its status to Hidden.</p>
+                </div>
+              </div>
+            </template>
+          </section>
+
+          <!-- ============ Categories ============ -->
+          <section class="view" x-show="view === 'categories'" aria-labelledby="categories-title">
+            <div class="view-head">
+              <div>
+                <h1 id="categories-title" class="view-title">Categories</h1>
+                <p class="view-lede">The groups customers can filter by, in the order they appear.</p>
+              </div>
+              <div class="head-actions">
+                <span class="unsaved" x-show="viewDirty()">Unsaved changes</span>
+                <button type="button" class="btn btn-quiet" x-on:click="addCategory()">Add category</button>
+                <button type="button" class="btn btn-primary" x-bind:disabled="!viewDirty()" x-on:click="saveCategories()">Save</button>
+              </div>
+            </div>
+            <div class="stack">
+              <template x-for="(category, index) in categories" x-bind:key="index">
+                <div class="card">
+                  <div class="field-row">
+                    <label class="field"><span>Name</span><input class="input" x-model="category.name" /></label>
+                    <label class="field">
+                      <span>Photo on the home page</span>
+                      <select class="input" x-model="category.coverProduct">
+                        <option value="">First product in the category</option>
+                        <template x-for="item in products.filter((entry) => entry.category === category.id)" x-bind:key="item.id">
+                          <option x-bind:value="item.id" x-text="item.name" x-bind:selected="item.id === category.coverProduct"></option>
+                        </template>
+                      </select>
+                    </label>
+                    <label class="field">
+                      <span>
+                        Colour
+                        <span
+                          class="swatch"
+                          aria-hidden="true"
+                          x-bind:style="`background: ${category.colour ? `var(--${category.colour}-bright)` : 'var(--oat)'}`"
+                        ></span>
+                      </span>
+                      <select class="input" x-model="category.colour">
+                        <option value="">Automatic</option>
+                        <template x-for="colour in yarnColours" x-bind:key="colour.id">
+                          <option x-bind:value="colour.id" x-text="colour.label" x-bind:selected="colour.id === category.colour"></option>
+                        </template>
+                      </select>
+                    </label>
+                  </div>
+                  <label class="field"><span>Description</span><input class="input" x-model="category.description" /></label>
+                  <div class="card-foot">
+                    <small x-text="category.id ? `${productsIn(category.id)} products` : 'New category: save to create it'"></small>
+                    <div class="head-actions">
+                      <button type="button" class="btn btn-quiet btn-sm" x-bind:disabled="index === 0" x-on:click="moveItem(categories, index, -1)">
+                        Move up
+                      </button>
+                      <button
+                        type="button"
+                        class="btn btn-quiet btn-sm"
+                        x-bind:disabled="index === categories.length - 1"
+                        x-on:click="moveItem(categories, index, 1)"
+                      >
+                        Move down
+                      </button>
+                      <button type="button" class="btn btn-quiet btn-sm danger" x-on:click="removeCategory(index)">Remove</button>
+                    </div>
+                  </div>
+                </div>
+              </template>
+            </div>
+          </section>
+
+          <!-- ============ FAQ ============ -->
+          <section class="view" x-show="view === 'faq'" aria-labelledby="faq-title">
+            <div class="view-head">
+              <div>
+                <h1 id="faq-title" class="view-title">FAQ</h1>
+                <p class="view-lede">Questions on the FAQ page. Tick “Home page” to show a question on the home page too.</p>
+              </div>
+              <div class="head-actions">
+                <span class="unsaved" x-show="viewDirty()">Unsaved changes</span>
+                <button type="button" class="btn btn-quiet" x-on:click="addFaq()">Add question</button>
+                <button type="button" class="btn btn-primary" x-bind:disabled="!viewDirty()" x-on:click="saveFaq()">Save</button>
+              </div>
+            </div>
+            <div class="stack">
+              <template x-for="(item, index) in faq" x-bind:key="index">
+                <div class="card">
+                  <div class="field-row">
+                    <label class="field"><span>Question</span><input class="input" x-model="item.question" /></label>
+                    <label class="field">
+                      <span>Topic</span>
+                      <select class="input" x-model="item.group">
+                        <template x-for="group in faqGroups" x-bind:key="group">
+                          <option x-bind:value="group" x-text="group" x-bind:selected="group === item.group"></option>
+                        </template>
+                      </select>
+                    </label>
+                  </div>
+                  <label class="field"><span>Answer</span><textarea class="input" rows="3" x-model="item.answer"></textarea></label>
+                  <div class="card-foot">
+                    <label class="check"><input type="checkbox" x-model="item.onHome" /><span>Home page</span></label>
+                    <div class="head-actions">
+                      <button type="button" class="btn btn-quiet btn-sm" x-bind:disabled="index === 0" x-on:click="moveItem(faq, index, -1)">
+                        Move up
+                      </button>
+                      <button
+                        type="button"
+                        class="btn btn-quiet btn-sm"
+                        x-bind:disabled="index === faq.length - 1"
+                        x-on:click="moveItem(faq, index, 1)"
+                      >
+                        Move down
+                      </button>
+                      <button type="button" class="btn btn-quiet btn-sm danger" x-on:click="faq.splice(index, 1)">Remove</button>
+                    </div>
+                  </div>
+                </div>
+              </template>
+            </div>
+          </section>
+
+          <!-- ============ Policies ============ -->
+          <section class="view" x-show="view === 'policies'" aria-labelledby="policies-title">
+            <div class="view-head">
+              <div>
+                <h1 id="policies-title" class="view-title">Policies</h1>
+                <p class="view-lede">Shipping, returns, privacy and terms. Untick “Draft” once the wording is final.</p>
+              </div>
+            </div>
+            <div class="policy-layout">
+              <div class="stack">
+                <template x-for="item in policies" x-bind:key="item.id">
+                  <button
+                    type="button"
+                    class="card policy-item"
+                    x-bind:class="{ 'is-active': policy && policy.id === item.id }"
+                    x-on:click="selectPolicy(item.id)"
+                  >
+                    <strong x-text="item.title"></strong>
+                    <small x-text="item.draft ? 'Draft' : `Final · updated ${item.updated}`"></small>
+                  </button>
+                </template>
+              </div>
+              <p class="card hint" x-show="!policy">Choose a policy to edit it.</p>
+              <template x-if="policy">
+                <div class="card">
+                  <label class="field"><span>Title</span><input class="input" x-model="policy.title" /></label>
+                  <label class="field"><span>Summary</span><input class="input" x-model="policy.summary" /></label>
+                  <label class="field">
+                    <span>Text</span>
+                    <textarea class="input mono" rows="18" x-model="policy.body"></textarea>
+                    <small>Start a line with ## for a heading or - for a bullet point. Put ** around words to make them bold.</small>
+                  </label>
+                  <label class="check">
+                    <input type="checkbox" x-model="policy.draft" />
+                    <span>Draft: shows a notice on the page and stops the live site from publishing</span>
+                  </label>
+                  <div class="head-actions">
+                    <span class="unsaved" x-show="viewDirty()">Unsaved changes</span>
+                    <button type="button" class="btn btn-primary" x-bind:disabled="!viewDirty()" x-on:click="savePolicy()">Save policy</button>
+                  </div>
+                </div>
+              </template>
+            </div>
+          </section>
+
+          <!-- ============ Shop settings ============ -->
+          <section class="view" x-show="view === 'settings'" aria-labelledby="settings-title">
+            <template x-if="settings">
+              <div class="stack">
+                <div class="view-head">
+                  <div>
+                    <h1 id="settings-title" class="view-title">Shop settings</h1>
+                    <p class="view-lede">Your shop’s name, contact details, and payment and delivery information.</p>
+                  </div>
+                  <div class="head-actions">
+                    <span class="unsaved" x-show="viewDirty()">Unsaved changes</span>
+                    <button type="button" class="btn btn-primary" x-bind:disabled="!viewDirty()" x-on:click="saveSettings()">Save settings</button>
+                  </div>
+                </div>
+                <div class="editor-grid">
+                  <section class="card">
+                    <h2 class="card-title">Shop</h2>
+                    <label class="field">
+                      <span>Shop name</span>
+                      <input class="input" x-model="settings.name" />
+                      <small>The logo artwork spells “Loopwork”, so it needs redrawing if you rename the shop.</small>
+                    </label>
+                    <label class="field"><span>Tagline</span><input class="input" x-model="settings.tagline" /></label>
+                    <label class="field">
+                      <span>Description for search results and link previews</span>
+                      <textarea class="input" rows="3" x-model="settings.description"></textarea>
+                    </label>
+                    <label class="field">
+                      <span>Website address</span>
+                      <input class="input" placeholder="https://loopwork.in" x-model="settings.url" />
+                    </label>
+                  </section>
+
+                  <section class="card">
+                    <h2 class="card-title">Contact</h2>
+                    <label class="field">
+                      <span>WhatsApp number for orders</span>
+                      <input class="input" inputmode="numeric" placeholder="919876543210" x-model="settings.whatsappNumber" />
+                      <small
+                        x-text="whatsappPreview ? `Country code and number, digits only. Customers see ${whatsappPreview}.` : 'Country code and number, digits only, like 919876543210.'"
+                      ></small>
+                    </label>
+                    <label class="field"><span>Email</span><input class="input" type="email" x-model="settings.email" /></label>
+                    <div class="field-row">
+                      <label class="field">
+                        <span>Instagram link</span>
+                        <input class="input" placeholder="https://www.instagram.com/loopwork" x-model="settings.instagramUrl" />
+                      </label>
+                      <label class="field">
+                        <span>Instagram handle</span>
+                        <input class="input" placeholder="@loopwork" x-model="settings.instagramHandle" />
+                      </label>
+                    </div>
+                    <label class="field">
+                      <span>Usual reply time</span>
+                      <input class="input" placeholder="within a day" x-model="settings.replyTime" />
+                      <small>Finishes the sentence “We usually reply …”.</small>
+                    </label>
+                  </section>
+
+                  <section class="card">
+                    <h2 class="card-title">Payment and orders</h2>
+                    <label class="field">
+                      <span>How customers pay</span>
+                      <input class="input" placeholder="UPI or bank transfer" x-model="settings.payment" />
+                    </label>
+                    <div class="field-row">
+                      <label class="field">
+                        <span>Order number prefix</span>
+                        <input class="input" maxlength="5" x-model="settings.orderIdPrefix" />
+                        <small x-text="`Order numbers look like ${String(settings.orderIdPrefix || 'ORD').toUpperCase()}-7K3QX.`"></small>
+                      </label>
+                      <label class="field">
+                        <span>Most of one piece per order</span>
+                        <input class="input" inputmode="numeric" x-model="settings.maxQtyPerItem" />
+                      </label>
+                    </div>
+                  </section>
+
+                  <section class="card">
+                    <h2 class="card-title">Delivery</h2>
+                    <label class="field">
+                      <span>Where you ship</span>
+                      <input class="input" placeholder="across India" x-model="settings.shipping.area" />
+                      <small>Finishes the sentence “Ships …”.</small>
+                    </label>
+                    <label class="field"><span>When orders are sent</span><input class="input" x-model="settings.shipping.dispatch" /></label>
+                    <label class="field"><span>How long delivery takes</span><input class="input" x-model="settings.shipping.transit" /></label>
+                    <label class="field">
+                      <span>How shipping is charged</span>
+                      <textarea class="input" rows="2" x-model="settings.shipping.charges"></textarea>
+                    </label>
+                    <label class="check"><input type="checkbox" x-model="settings.pickup.enabled" /><span>Customers can pick up orders</span></label>
+                    <label class="field" x-show="settings.pickup.enabled">
+                      <span>Pickup note</span>
+                      <input class="input" x-model="settings.pickup.note" />
+                    </label>
+                  </section>
+                </div>
+              </div>
+            </template>
+          </section>
+
+          <!-- ============ Page photos ============ -->
+          <section class="view" x-show="view === 'site-photos'" aria-labelledby="site-photos-title">
+            <template x-if="settings">
+              <div class="stack">
+                <div class="view-head">
+                  <div>
+                    <h1 id="site-photos-title" class="view-title">Page photos</h1>
+                    <p class="view-lede">The large photos on the Home, About and Custom orders pages.</p>
+                  </div>
+                  <div class="head-actions">
+                    <span class="unsaved" x-show="viewDirty()">Unsaved changes</span>
+                    <button type="button" class="btn btn-primary" x-bind:disabled="!viewDirty()" x-on:click="saveSettings()">
+                      Save descriptions
+                    </button>
+                  </div>
+                </div>
+                <div class="site-photo-grid">
+                  <template x-for="slot in sitePhotoSlots" x-bind:key="slot.key">
+                    <div class="card">
+                      <img class="site-photo" alt="" x-bind:src="sitePhotoUrl(slot.key)" />
+                      <div class="card-foot">
+                        <strong x-text="slot.label"></strong>
+                        <span class="status status-made-to-order" x-show="settings.sitePhotos[slot.key].sample">Sample photo</span>
+                      </div>
+                      <p class="hint" x-text="slot.hint"></p>
+                      <label class="field">
+                        <span>Describe the photo</span>
+                        <input class="input input-sm" x-model="settings.sitePhotos[slot.key].alt" />
+                      </label>
+                      <label class="btn btn-quiet btn-sm upload-button">
+                        <input
+                          type="file"
+                          class="visually-hidden"
+                          accept="image/jpeg,image/png,image/webp"
+                          x-on:change="uploadSitePhoto(slot.key, $event.target.files); $event.target.value = ''"
+                        />
+                        Replace photo
+                      </label>
+                    </div>
+                  </template>
+                </div>
+              </div>
+            </template>
+          </section>
+
+          <!-- ============ Ready to publish ============ -->
+          <section class="view" x-show="view === 'publish'" aria-labelledby="publish-title">
+            <div class="view-head">
+              <div>
+                <h1 id="publish-title" class="view-title">Ready to publish?</h1>
+                <p
+                  class="view-lede"
+                  x-text="problems === 0 ? 'Everything on the checklist is done.' : `${problems} ${problems === 1 ? 'thing' : 'things'} to sort out before the shop goes live.`"
+                >
+                </p>
+              </div>
+            </div>
+            <ul class="checklist" role="list">
+              <template x-for="check in checks" x-bind:key="check.id">
+                <li class="card check-item" x-bind:class="check.ok ? 'is-ok' : 'is-todo'">
+                  <span class="check-icon" aria-hidden="true" x-text="check.ok ? '✓' : '!'"></span>
+                  <div>
+                    <strong x-text="check.label"></strong>
+                    <p x-text="check.detail"></p>
+                  </div>
+                  <button type="button" class="btn btn-quiet btn-sm" x-show="!check.ok" x-on:click="go(check.target)">Fix</button>
+                </li>
+              </template>
+            </ul>
+            <div class="card">
+              <h2 class="card-title">How to publish your changes</h2>
+              <ol class="publish-steps">
+                <li>
+                  Check the shop in your browser. Everything you save here shows up straight away at
+                  <a href="/" target="_blank" rel="noopener">localhost:4321</a>.
+                </li>
+                <li>
+                  Deploy with <code>npm run deploy</code>. This needs the Cloudflare setup from Round 2; until then the site only runs on
+                  this computer.
+                </li>
+              </ol>
+            </div>
+          </section>
+        </div>
+      </main>
+
+      <!-- New product -->
+      <div class="modal" x-show="creating" x-cloak>
+        <template x-if="creating">
+          <form class="modal-card" x-on:submit="$event.preventDefault(); createProduct()">
+            <h2 class="modal-title">Add a product</h2>
+            <p class="hint">
+              It starts hidden with a placeholder photo. Add photos and details, then change its status when it’s ready.
+            </p>
+            <label class="field"><span>Name</span><input class="input" maxlength="60" required x-model="creating.name" /></label>
+            <div class="field-row">
+              <label class="field">
+                <span>Category</span>
+                <select class="input" x-model="creating.category">
+                  <template x-for="category in categories" x-bind:key="category.id">
+                    <option x-bind:value="category.id" x-text="category.name" x-bind:selected="category.id === creating.category"></option>
+                  </template>
+                </select>
+              </label>
+              <label class="field"><span>Price (₹)</span><input class="input" inputmode="numeric" required x-model="creating.price" /></label>
+            </div>
+            <p class="form-error" x-show="createError" x-text="createError"></p>
+            <div class="modal-actions">
+              <button type="button" class="btn btn-quiet" x-on:click="creating = null">Cancel</button>
+              <button type="submit" class="btn btn-primary" x-bind:disabled="busy">Create product</button>
+            </div>
+          </form>
+        </template>
+      </div>
+
+      <p class="toast" role="status" x-show="toastText" x-text="toastText" x-cloak></p>
+    </div>
+
+    <script>
+      import './admin.js';
+    </script>
+  </body>
+</html>
+
+<style is:global>
+  [x-cloak] {
+    display: none !important;
+  }
+
+  .admin-body {
+    background: var(--cotton);
+  }
+
+  .admin {
+    display: grid;
+    grid-template-columns: 14rem minmax(0, 1fr);
+    grid-template-rows: auto 1fr;
+    min-height: 100vh;
+  }
+
+  .admin-top {
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    padding: 0.8rem 1.5rem;
+    border-bottom: 1px solid var(--line);
+    background: var(--paper);
+  }
+
+  .admin-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    text-decoration: none;
+  }
+
+  .admin-brand .logo {
+    height: 1.75rem;
+  }
+
+  .admin-badge {
+    padding: 0.2rem 0.6rem;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    font-size: var(--text-xs);
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .admin-note {
+    margin-left: auto;
+    font-size: var(--text-xs);
+    color: var(--muted);
+  }
+
+  .admin-nav {
+    position: sticky;
+    top: 3.9rem;
+    display: grid;
+    align-content: start;
+    gap: 0.15rem;
+    height: calc(100vh - 3.9rem);
+    padding: 1.25rem 0.75rem;
+    border-right: 1px solid var(--line);
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    padding: 0.6rem 0.85rem;
+    border: 0;
+    border-radius: var(--radius-sm);
+    background: none;
+    font-weight: 600;
+    text-align: left;
+  }
+
+  .nav-item:hover {
+    background: var(--oat);
+  }
+
+  .nav-item.is-active {
+    background: var(--ink);
+    color: var(--cotton);
+  }
+
+  .nav-count {
+    min-width: 1.4rem;
+    padding: 0 0.4rem;
+    border-radius: 999px;
+    background: var(--berry);
+    color: #fff;
+    font-size: 0.75rem;
+    text-align: center;
+  }
+
+  .admin-main {
+    min-width: 0;
+    padding: 1.75rem clamp(1rem, 3vw, 2.5rem) 5rem;
+  }
+
+  .admin-message {
+    color: var(--muted);
+  }
+
+  .view {
+    display: grid;
+    gap: 1.25rem;
+    max-width: 72rem;
+  }
+
+  .view-head,
+  .editor-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: end;
+    justify-content: space-between;
+    gap: 0.75rem 1rem;
+  }
+
+  .editor-bar {
+    position: sticky;
+    top: 3.9rem;
+    z-index: 10;
+    align-items: center;
+    padding: 0.75rem 0;
+    background: var(--cotton);
+  }
+
+  .editor-bar .view-title {
+    flex: 1;
+  }
+
+  .view-title {
+    font-family: var(--font-display);
+    font-size: var(--text-2xl);
+    font-weight: 400;
+  }
+
+  .view-lede,
+  .hint {
+    color: var(--muted);
+  }
+
+  .hint {
+    font-size: var(--text-sm);
+  }
+
+  .head-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .unsaved {
+    font-size: var(--text-xs);
+    font-weight: 700;
+    color: var(--marigold);
+  }
+
+  .btn-sm {
+    min-height: 2.25rem;
+    padding: 0.35rem 0.8rem;
+    font-size: var(--text-xs);
+  }
+
+  .danger {
+    color: var(--danger);
+  }
+
+  .danger:hover {
+    border-color: var(--danger);
+  }
+
+  .stack {
+    display: grid;
+    gap: 1rem;
+  }
+
+  .card {
+    display: grid;
+    align-content: start;
+    gap: 0.9rem;
+    padding: 1.25rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--paper);
+  }
+
+  .card-title {
+    font-size: var(--text-xs);
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+  }
+
+  .card-wide {
+    grid-column: 1 / -1;
+  }
+
+  .card-foot {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+  }
+
+  .card-foot small {
+    color: var(--muted);
+  }
+
+  .admin .field > span {
+    font-size: var(--text-sm);
+    font-weight: 700;
+  }
+
+  .admin .field small {
+    font-size: var(--text-xs);
+    color: var(--muted);
+  }
+
+  .field-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+    align-items: end;
+    gap: 0.9rem;
+  }
+
+  .input-sm {
+    min-height: 2.3rem;
+    padding: 0.35rem 0.6rem;
+    font-size: var(--text-sm);
+  }
+
+  .mono {
+    font-family: ui-monospace, 'Cascadia Mono', Consolas, monospace;
+    font-size: var(--text-sm);
+  }
+
+  .form-error {
+    padding: 0.75rem 1rem;
+    border-radius: var(--radius-sm);
+    background: var(--danger-soft);
+    color: var(--danger);
+    font-size: var(--text-sm);
+    font-weight: 600;
+  }
+
+  .filters {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr;
+    gap: 0.75rem;
+  }
+
+  .table {
+    overflow: hidden;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--paper);
+  }
+
+  .table-row {
+    display: grid;
+    grid-template-columns: minmax(0, 2.4fr) 6.5rem 11rem 8rem 4.5rem;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.65rem 1rem;
+    border-top: 1px solid var(--line);
+  }
+
+  .table-head {
+    border-top: 0;
+    background: var(--oat);
+    font-size: var(--text-xs);
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .table-row.is-hidden {
+    background: #fafaf7;
+  }
+
+  .table-row.is-hidden img {
+    opacity: 0.5;
+  }
+
+  .cell-product {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    min-width: 0;
+  }
+
+  .cell-product img {
+    flex: none;
+    width: 3.5rem;
+    height: 4.4rem;
+    border-radius: 6px;
+    background: var(--oat);
+    object-fit: cover;
+  }
+
+  .cell-product strong {
+    display: block;
+  }
+
+  .cell-product small {
+    font-size: var(--text-xs);
+    color: var(--muted);
+  }
+
+  .cell-price {
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .switch {
+    font-size: var(--text-xs);
+  }
+
+  .cell-actions {
+    text-align: right;
+  }
+
+  .empty {
+    padding: 2rem;
+    text-align: center;
+    color: var(--muted);
+  }
+
+  .editor-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(22rem, 1fr));
+    align-items: start;
+    gap: 1rem;
+  }
+
+  .care-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.5rem 1rem;
+  }
+
+  .option-row {
+    display: grid;
+    grid-template-columns: 1fr 2fr auto;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .photo-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
+    gap: 1rem;
+  }
+
+  .photo-card {
+    display: grid;
+    align-content: start;
+    gap: 0.5rem;
+  }
+
+  .photo-frame {
+    position: relative;
+    overflow: hidden;
+    border-radius: var(--radius-sm);
+    background: var(--oat);
+    cursor: crosshair;
+  }
+
+  .photo-frame img {
+    width: 100%;
+    height: auto;
+  }
+
+  .focus-dot {
+    position: absolute;
+    width: 1.1rem;
+    height: 1.1rem;
+    margin: -0.55rem 0 0 -0.55rem;
+    border: 2.5px solid #fff;
+    border-radius: 50%;
+    box-shadow: 0 0 0 1.5px var(--ink);
+    pointer-events: none;
+  }
+
+  .photo-actions {
+    display: flex;
+    gap: 0.35rem;
+  }
+
+  .photo-drop {
+    display: grid;
+    place-content: center;
+    gap: 0.35rem;
+    min-height: 11rem;
+    padding: 1rem;
+    border: 2px dashed var(--line-strong);
+    border-radius: var(--radius-sm);
+    font-size: var(--text-xs);
+    text-align: center;
+    color: var(--muted);
+    cursor: pointer;
+  }
+
+  .photo-drop strong {
+    font-size: var(--text-sm);
+    color: var(--ink);
+  }
+
+  .photo-drop:hover,
+  .photo-drop:focus-within {
+    border-color: var(--berry);
+  }
+
+  .danger-zone {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--line);
+    font-size: var(--text-sm);
+    color: var(--muted);
+  }
+
+  .policy-layout {
+    display: grid;
+    grid-template-columns: 16rem minmax(0, 1fr);
+    align-items: start;
+    gap: 1rem;
+  }
+
+  .policy-item {
+    gap: 0.2rem;
+    text-align: left;
+    cursor: pointer;
+  }
+
+  .policy-item small {
+    color: var(--muted);
+  }
+
+  .policy-item.is-active {
+    border-color: var(--ink);
+    box-shadow: inset 0 0 0 1px var(--ink);
+  }
+
+  .site-photo-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+    gap: 1rem;
+  }
+
+  .site-photo {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    border-radius: var(--radius-sm);
+    background: var(--oat);
+    object-fit: cover;
+  }
+
+  .upload-button {
+    justify-self: start;
+    cursor: pointer;
+  }
+
+  .checklist {
+    display: grid;
+    gap: 0.6rem;
+  }
+
+  .check-item {
+    grid-template-columns: 2rem minmax(0, 1fr) auto;
+    align-items: center;
+  }
+
+  .check-item p {
+    font-size: var(--text-sm);
+    color: var(--muted);
+  }
+
+  .check-icon {
+    display: grid;
+    place-items: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    font-weight: 800;
+  }
+
+  .is-ok .check-icon {
+    background: var(--mint-soft);
+    color: var(--mint);
+  }
+
+  .swatch {
+    display: inline-block;
+    width: 0.85rem;
+    height: 0.85rem;
+    margin-left: 0.3rem;
+    border-radius: 50%;
+    vertical-align: -0.08rem;
+  }
+
+  .is-todo .check-icon {
+    background: var(--marigold-soft);
+    color: var(--marigold);
+  }
+
+  .publish-steps {
+    display: grid;
+    gap: 0.5rem;
+    padding-left: 1.25rem;
+  }
+
+  .publish-steps code {
+    padding: 0.1rem 0.4rem;
+    border-radius: 4px;
+    background: var(--oat);
+    font-size: 0.9em;
+  }
+
+  .modal {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    display: grid;
+    place-items: center;
+    padding: 1rem;
+    background: rgb(30 36 51 / 0.45);
+  }
+
+  .modal-card {
+    display: grid;
+    gap: 1rem;
+    width: min(32rem, 100%);
+    padding: 1.5rem;
+    border-radius: var(--radius-lg);
+    background: var(--paper);
+    box-shadow: var(--shadow-lift);
+  }
+
+  .modal-title {
+    font-family: var(--font-display);
+    font-size: var(--text-xl);
+    font-weight: 400;
+  }
+
+  .modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+  }
+
+  .toast {
+    position: fixed;
+    left: 50%;
+    bottom: 1.5rem;
+    z-index: 60;
+    max-width: calc(100vw - 2rem);
+    padding: 0.7rem 1.1rem;
+    border-radius: 999px;
+    background: var(--ink);
+    color: var(--cotton);
+    font-size: var(--text-sm);
+    font-weight: 600;
+    box-shadow: var(--shadow-lift);
+    transform: translateX(-50%);
+  }
+
+  @media (max-width: 60rem) {
+    .admin {
+      grid-template-columns: 1fr;
+    }
+
+    .admin-note {
+      display: none;
+    }
+
+    .admin-nav {
+      position: static;
+      display: flex;
+      height: auto;
+      overflow-x: auto;
+      padding: 0.5rem;
+      border-right: 0;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .nav-item {
+      white-space: nowrap;
+    }
+
+    .filters,
+    .policy-layout {
+      grid-template-columns: 1fr;
+    }
+
+    .table-head {
+      display: none;
+    }
+
+    .table-row {
+      grid-template-columns: minmax(0, 1fr) auto;
+    }
+  }
+</style>

@@ -1,0 +1,67 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="Page not found" noindex>
+  <section class="not-found-band band scallop-bottom yarn-lilac">
+    <div class="wrap not-found">
+      <div class="dropped" aria-hidden="true">
+        <span class="chain"></span>
+        <span class="missing"></span>
+        <span class="chain"></span>
+      </div>
+      <p class="eyebrow">Page not found</p>
+      <h1 class="display page-title">Oops, we dropped a stitch.</h1>
+      <p class="page-lede">This page doesn't exist, or the piece you're looking for is no longer listed.</p>
+      <div class="actions">
+        <a class="btn btn-primary" href="/shop/">Browse the shop</a>
+        <a class="btn btn-outline" href="/">Go to the home page</a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .not-found-band {
+    padding-block: clamp(3rem, 2rem + 6vw, 7rem);
+  }
+
+  .not-found {
+    display: grid;
+    justify-items: center;
+    gap: 1rem;
+    text-align: center;
+  }
+
+  .page-lede {
+    margin-inline: auto;
+  }
+
+  /* A row of chain stitches with one stitch missing. */
+  .dropped {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    margin-bottom: 1rem;
+  }
+
+  .dropped .chain {
+    display: block;
+    width: 5.25rem;
+  }
+
+  .missing {
+    width: 0.8rem;
+    height: 0.5rem;
+    border: 1.5px dashed var(--yarn-deep);
+    border-radius: 50%;
+  }
+
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.75rem;
+    margin-top: 0.5rem;
+  }
+</style>

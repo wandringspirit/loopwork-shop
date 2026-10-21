@@ -1,0 +1,12 @@
+---
+import { statusLabels, type ProductStatus } from '../lib/status';
+
+interface Props {
+  status: ProductStatus;
+  class?: string;
+}
+
+const { status, class: className } = Astro.props;
+---
+
+<span class:list={['status', `status-${status}`, className]}>{statusLabels[status]}</span>

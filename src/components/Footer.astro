@@ -1,0 +1,153 @@
+---
+import Logo from './Logo.astro';
+import WhatsAppIcon from './WhatsAppIcon.astro';
+import { getCategories } from '../lib/catalog';
+import { whatsappLink } from '../lib/whatsapp';
+import { site } from '../site.config';
+
+const categories = await getCategories();
+const year = new Date().getFullYear();
+---
+
+<footer class="site-footer scallop-top">
+  <div class="chain footer-chain" aria-hidden="true"></div>
+  <div class="wrap footer-grid">
+    <div class="footer-brand">
+      <a href="/" class="footer-logo" aria-label={`${site.name} home`}><Logo tone="light" /></a>
+      <p>{site.tagline}</p>
+      <a class="btn footer-whatsapp" href={whatsappLink()} target="_blank" rel="noopener">
+        <WhatsAppIcon />
+        Chat on WhatsApp
+      </a>
+    </div>
+
+    <nav class="footer-col" aria-labelledby="footer-shop">
+      <h2 id="footer-shop">Shop</h2>
+      <ul role="list">
+        <li><a href="/shop/">All pieces</a></li>
+        {
+          categories.map((category) => (
+            <li>
+              <a href={`/shop/?category=${category.id}`}>{category.data.name}</a>
+            </li>
+          ))
+        }
+        <li><a href="/custom-orders/">Custom orders</a></li>
+      </ul>
+    </nav>
+
+    <nav class="footer-col" aria-labelledby="footer-help">
+      <h2 id="footer-help">Help</h2>
+      <ul role="list">
+        <li><a href="/faq/">FAQ</a></li>
+        <li><a href="/policies/shipping/">Shipping</a></li>
+        <li><a href="/policies/returns/">Returns &amp; cancellations</a></li>
+        <li><a href="/contact/">Contact</a></li>
+      </ul>
+    </nav>
+
+    <nav class="footer-col" aria-labelledby="footer-about">
+      <h2 id="footer-about">About</h2>
+      <ul role="list">
+        <li><a href="/about/">Our story</a></li>
+        <li><a href={site.instagramUrl} target="_blank" rel="noopener">Instagram</a></li>
+        <li><a href="/policies/privacy/">Privacy</a></li>
+        <li><a href="/policies/terms/">Terms</a></li>
+      </ul>
+    </nav>
+  </div>
+
+  <div class="wrap footer-base">
+    <p>© {year} {site.name}. Handmade in {site.country}.</p>
+    <p>Prices in Indian rupees (₹). You pay only after we confirm your order.</p>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    --scallop-colour: var(--plum);
+    margin-top: calc(var(--section) + var(--scallop));
+    padding: 1.25rem 0 2rem;
+    background: var(--plum);
+    color: rgb(244 245 240 / 0.82);
+  }
+
+  @media (max-width: 47.99rem) {
+    .site-footer {
+      padding-bottom: 6rem; /* room for the floating WhatsApp button */
+    }
+  }
+
+  .footer-chain {
+    width: min(100% - 2 * var(--gutter), var(--wrap));
+    margin: 0 auto 3.5rem;
+  }
+
+  .footer-grid {
+    display: grid;
+    gap: 2.5rem 2rem;
+  }
+
+  @media (min-width: 48rem) {
+    .footer-grid {
+      grid-template-columns: 1.6fr repeat(3, 1fr);
+    }
+  }
+
+  .footer-brand {
+    display: grid;
+    align-content: start;
+    justify-items: start;
+    gap: 1rem;
+    max-width: 22rem;
+  }
+
+  .footer-logo {
+    text-decoration: none;
+  }
+
+  .footer-whatsapp {
+    border-color: rgb(244 245 240 / 0.35);
+    color: var(--cotton);
+  }
+
+  .footer-whatsapp:hover {
+    border-color: var(--cotton);
+    background: rgb(244 245 240 / 0.08);
+  }
+
+  .footer-col h2 {
+    margin-bottom: 0.9rem;
+    font-size: var(--text-xs);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #f0b3cf;
+  }
+
+  .footer-col ul {
+    display: grid;
+    gap: 0.55rem;
+  }
+
+  .footer-col a {
+    font-size: var(--text-sm);
+    text-decoration: none;
+  }
+
+  .footer-col a:hover {
+    color: #fff;
+    text-decoration: underline;
+  }
+
+  .footer-base {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 0.5rem 2rem;
+    margin-top: 3.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid rgb(244 245 240 / 0.14);
+    font-size: var(--text-xs);
+    color: rgb(244 245 240 / 0.62);
+  }
+</style>
