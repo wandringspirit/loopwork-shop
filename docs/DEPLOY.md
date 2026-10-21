@@ -18,7 +18,7 @@ The admin at `/admin` only exists while `npm run dev` runs. It writes straight i
 
 | | |
 |---|---|
-| Worker | `loopwork-demo` (static assets only, no Worker code yet) |
+| Worker | `loopwork-demo`: static assets, plus `worker/index.js`, which only runs for `/sell` and redirects to the ₹ or USD sales page by country |
 | Cloudflare account | the one that owns leadspilot.co: **leadpilot01@gmail.com**, account `53053160…` |
 | Domain | `loopwork.leadspilot.co`, a custom domain on the Worker (`routes` in `wrangler.jsonc`) |
 | Config | `wrangler.jsonc` |

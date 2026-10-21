@@ -3,6 +3,7 @@
 The plan for selling done-for-you shops to handmade sellers. Everything here is sent by you, by hand, one person at a time. Nothing is ever sent automatically.
 
 **What you send people**
+- Anyone, anywhere: **https://loopwork.leadspilot.co/sell** opens the ₹ page for visitors in India and the USD page for everyone else (by the country Cloudflare detects). Use this one in your Instagram bio.
 - India: https://loopwork.leadspilot.co/for-sellers/ or the PDF `docs/for-sellers.pdf`
 - Outside India: https://loopwork.leadspilot.co/for-sellers/international/ or `docs/for-sellers-international.pdf`
 - The demo shop itself: https://loopwork.leadspilot.co
