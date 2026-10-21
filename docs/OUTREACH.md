@@ -37,7 +37,7 @@ Good niches: crochet and knitting, candles, resin art, jewellery, embroidery, cl
 
 You have no clients yet, so make saying yes easy:
 
-1. **Founding price:** the first 3 clients get the Shop plan at the Starter price (₹4,999 / $299), in return for a short testimonial and permission to show their shop on the sales page.
+1. **Founding price:** the first 3 clients get the Shop plan at the Starter price (₹2,499 / $299), in return for a short testimonial and permission to show their shop on the sales page.
 2. **Free preview:** offer to make a private preview with 3 or 4 of their products before they pay anything. Ask first ("Can I use 3 of your photos to make you a free preview?"). Then run `npm run starter`, add their name and those products, deploy it to a private preview address (`*.workers.dev`), and send the link. Seeing their own products in a real shop is what sells it.
 3. **Half up front, half at launch.** Low risk for them, safe for you.
 
@@ -82,7 +82,7 @@ Change the bracketed parts every time. Mention something specific about their wo
 
 ### When they reply "interested" or "how much?"
 
-> Great! Plans start at [₹4,999 / $299], one time, and hosting is free, so you only pay for your domain each year. Everything is here: [sales page link].
+> Great! Plans start at [₹2,499 / $299], one time, and hosting is free, so you only pay for your domain each year. Everything is here: [sales page link].
 >
 > Easiest next step: send me 3 or 4 product photos with names and prices, and I'll make you a free preview in a day or two.
 

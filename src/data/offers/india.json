@@ -2,7 +2,7 @@
   "plans": [
     {
       "name": "Starter",
-      "price": 4999,
+      "price": 2499,
       "per": "one-time",
       "colour": "teal",
       "blurb": "A ready shop with your name, products and WhatsApp.",
@@ -16,7 +16,7 @@
     },
     {
       "name": "Shop",
-      "price": 8999,
+      "price": 3499,
       "per": "one-time",
       "colour": "berry",
       "popular": true,
@@ -46,13 +46,13 @@
   "addOns": [
     {
       "name": "Online payments",
-      "price": 3999,
+      "price": 999,
       "from": true,
       "text": "A checkout page where customers pay on the site by UPI, card or netbanking with Razorpay, or internationally with PayPal or Stripe. Gateway fees are charged by the provider."
     },
     {
       "name": "Order book",
-      "price": 1999,
+      "price": 499,
       "text": "Every order is also saved to a Google Sheet, so nothing gets lost in your chats."
     },
     {
@@ -63,7 +63,7 @@
     },
     {
       "name": "Simple logo",
-      "price": 1499,
+      "price": 499,
       "text": "A clean wordmark and icon for the site, Instagram and WhatsApp profile."
     }
   ]

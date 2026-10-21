@@ -25,7 +25,7 @@ What's left to start selling done-for-you shops, in order. **Who** says whose mo
 
 | To do | Who | Details |
 |---|---|---|
-| Online checkout | Claude | Razorpay (India) or Stripe/PayPal (abroad), on the client's own payment account. Needs a small Worker to create payments and confirm them. Sold "from ₹3,999 / $199". |
+| Online checkout | Claude | Razorpay (India) or Stripe/PayPal (abroad), on the client's own payment account. Needs a small Worker to create payments and confirm them. Sold "from ₹999 / $199". |
 | Order book in Google Sheets | Claude | The Round 2 Worker plus Make, as planned in [ARCHITECTURE.md](ARCHITECTURE.md) §6–8. |
 
 ## Later: once there are paying clients

@@ -10,6 +10,7 @@ Newest first. Dates are IST.
 
 ## 2026-10-21
 
+- **Sales:** New India prices set by the owner: Starter ₹2,499, Shop ₹3,499, Online payments from ₹999, Order book ₹499, Simple logo ₹499 (Care plan ₹499/month and Extra products ₹99 unchanged). OUTREACH and ROADMAP updated, and `docs/for-sellers.pdf` remade.
 - **Deployed:** version `e80af803-fa79-49d0-97bf-42d0a65d0777`, with the single `/for-sellers/` address, the international page and the docs (roll back to `ef47b7ce-5941-428e-8541-bfeaa0fe7966`). Deployed from the piyushgaur17 login, which is now an Administrator on the leadpilot01 account.
 - **Deployed:** version `ef47b7ce-5941-428e-8541-bfeaa0fe7966` at 19:51, from the leadpilot01 login, outside this session's log. It held the international page but not yet the single `/for-sellers/` address.
 - **Infra:** piyushgaur17@gmail.com was invited to the leadpilot01 Cloudflare account as Administrator, so one wrangler login deploys here and to the owner's other projects; `account_id` in `wrangler.jsonc` picks the account.

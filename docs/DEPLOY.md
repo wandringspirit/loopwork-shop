@@ -75,6 +75,8 @@ The PDFs are printed from the built site, so the photos load:
 
 Each should be two pages. Or open the page in a browser and use **Print → Save as PDF**.
 
+**Close the PDF first** if it's open in your editor or a viewer: Chrome can't replace an open file and doesn't say so, so you'd keep the old one. Check the file's date afterwards.
+
 ## A client's shop
 
 1. Make their copy outside this project:
