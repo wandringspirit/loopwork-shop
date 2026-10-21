@@ -1,50 +1,25 @@
 ---
-import SellerOffer from '../../components/SellerOffer.astro';
-import offer from '../../data/offers/india.json';
-import { formatPrice } from '../../lib/format';
-
-// The sales page for sellers in India, in rupees. Prices and add-ons: src/data/offers/india.json.
+// Fallback for /for-sellers/. On the live site worker/index.js answers this address first and
+// shows the ₹ or USD page by country; this page only shows during `npm run dev` / `npm run
+// preview`, or if the Worker is missing. It follows ?region=in|intl, or guesses from the
+// browser's time zone, and offers both links.
 ---
 
-<SellerOffer
-  path="/for-sellers/"
-  lang="en-IN"
-  title="A shop website for your handmade business"
-  description="Your own shop website with your products, your name and orders straight to your WhatsApp. No monthly platform fee."
-  money={formatPrice}
-  offer={offer}
-  intro={{
-    eyebrow: 'For crochet, craft and handmade sellers',
-    title: 'Your own shop website, with orders on WhatsApp.',
-    lede: 'Your products, your name, your domain. Customers browse, fill a cart and send the order straight to your WhatsApp. You confirm and take payment the way you already do.',
-    facts: ['Ready in about a week', 'No monthly platform fee', 'Online payments if you want them'],
-  }}
-  chatLines={['1 × Carrot Bunny (Peach) — ₹899', '2 × Bobble Coasters — ₹698']}
-  features={[
-    { colour: 'berry', title: 'Your own website', text: 'Your shop name on your own domain, not a page on someone else’s marketplace.' },
-    { colour: 'teal', title: 'Orders on WhatsApp', text: 'Customers fill a cart and send the whole order to your WhatsApp, with an order number.' },
-    { colour: 'marigold', title: 'Made for phones', text: 'Fast and easy to use on a phone, where most of your Instagram buyers are.' },
-    { colour: 'mint', title: 'Colours and sizes', text: 'Products can have options, and show ready to ship, made to order or sold out.' },
-    { colour: 'lilac', title: 'Custom orders', text: 'A page where people describe a commission: idea, colours, size and budget.' },
-    { colour: 'coral', title: 'No monthly fee', text: 'Hosting runs on a free plan. You only pay for your domain, about ₹700–1,200 a year.' },
-  ]}
-  steps={[
-    { title: 'Send your details', text: 'Photos, prices and a few lines about your shop, on WhatsApp.' },
-    { title: 'We build it', text: 'Your shop is ready to review in about a week.' },
-    { title: 'Go live', text: 'We connect your domain and test an order with you.' },
-    { title: 'Keep it fresh', text: 'Update products yourself, or let the care plan handle it.' },
-  ]}
-  faqs={[
-    { q: 'Do I need any technical skills?', a: 'No. Send us your photos and prices and we do the rest. With the care plan you send changes on WhatsApp.' },
-    { printed: false, q: 'Can customers pay on the website?', a: 'Yes, with the Online payments add-on: Razorpay for UPI, cards and netbanking in India, PayPal or Stripe for buyers abroad. Without it, you confirm orders and take payment on WhatsApp as you do today.' },
-    { q: 'Who owns the domain?', a: 'You do. It is registered in your name, and you renew it each year.' },
-    { printed: false, q: 'What does it cost each month?', a: 'Nothing, unless you choose the care plan. Hosting runs on a free plan; the domain is a yearly cost of about ₹700–1,200.' },
-    { q: 'Is it only for crochet?', a: 'No. It suits any handmade or small-batch seller: candles, jewellery, embroidery, bakes, art prints and more.' },
-  ]}
-  otherMarket={{ href: '/for-sellers/international/', label: 'Outside India? Prices in USD' }}
-  alternates={[
-    ['en-IN', '/for-sellers/'],
-    ['en', '/for-sellers/international/'],
-    ['x-default', '/for-sellers/international/'],
-  ]}
-/>
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>A shop website for your handmade business</title>
+    <script is:inline>
+      var region = new URLSearchParams(location.search).get('region');
+      var zone = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
+      var india = region ? region === 'in' : zone === 'Asia/Kolkata' || zone === 'Asia/Calcutta';
+      location.replace(india ? '/for-sellers/india/' : '/for-sellers/international/');
+    </script>
+  </head>
+  <body>
+    <p><a href="/for-sellers/india/">In India: prices in ₹</a></p>
+    <p><a href="/for-sellers/international/">Everywhere else: prices in USD</a></p>
+  </body>
+</html>

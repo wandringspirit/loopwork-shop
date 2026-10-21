@@ -2,7 +2,8 @@
 import SellerOffer from '../../components/SellerOffer.astro';
 import offer from '../../data/offers/international.json';
 
-// The sales page for sellers outside India, in US dollars, paid by PayPal invoice.
+// The sales page for sellers outside India, in US dollars, paid by PayPal invoice. Visitors outside
+// India see it at /for-sellers/ (worker/index.js); it also has its own address, /for-sellers/international/.
 // Prices and add-ons: src/data/offers/international.json.
 
 const dollars = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
@@ -43,10 +44,10 @@ const dollars = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'U
     { q: 'Who owns the domain?', a: 'You do. It is registered in your name, and you renew it each year.' },
     { printed: false, q: 'What does it cost each month?', a: 'Nothing, unless you choose the care plan. Hosting runs on a free plan; the domain is a yearly cost of about $10–20.' },
   ]}
-  otherMarket={{ href: '/for-sellers/', label: 'In India? Prices in ₹' }}
+  otherMarket={{ href: '/for-sellers/?region=in', label: 'In India? Prices in ₹' }}
   alternates={[
-    ['en-IN', '/for-sellers/'],
+    ['en-IN', '/for-sellers/india/'],
     ['en', '/for-sellers/international/'],
-    ['x-default', '/for-sellers/international/'],
+    ['x-default', '/for-sellers/'],
   ]}
 />

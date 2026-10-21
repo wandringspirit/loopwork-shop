@@ -20,6 +20,18 @@
         "4322"
       ],
       "port": 4322
+    },
+    {
+      "name": "crochet-worker",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": [
+        "wrangler",
+        "dev",
+        "--port",
+        "8788",
+        "--local"
+      ],
+      "port": 8788
     }
   ]
 }

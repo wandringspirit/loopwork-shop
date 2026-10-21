@@ -9,7 +9,7 @@ What's left to start selling done-for-you shops, in order. **Who** says whose mo
 | Get PayPal fully verified | You | Needed before taking USD. Steps in the `paypal-india-merchant-operator` notes; escalate if it's in review for more than a week. Use Wise or a bank transfer for a first client in the meantime. |
 | Confirm or change the prices | You | Suggested prices are in `src/data/offers/india.json` and `international.json`. Change them, then make the PDFs again ([DEPLOY.md](DEPLOY.md)). |
 | Choose a name for the service | You | The sales pages say "Shop websites for handmade sellers". A name goes in `demo.sellerName` in `src/data/settings.json`. |
-| Set up a business Instagram | You | Put loopwork.leadspilot.co/sell in the bio (it opens the ₹ or USD page by country), and post the demo shop. |
+| Set up a business Instagram | You | Put loopwork.leadspilot.co/for-sellers in the bio (it shows ₹ or USD prices by country), and post the demo shop. |
 | Start the daily outreach | You | 20 personalised DMs a day, tracked in a sheet. Plan and messages in [OUTREACH.md](OUTREACH.md). |
 | Point the demo's test orders at your WhatsApp | You / Claude | The shop's `whatsappNumber` is still the sample, so a prospect's test order goes nowhere. Set it in `/admin` and redeploy. |
 

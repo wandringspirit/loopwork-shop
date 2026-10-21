@@ -28,7 +28,6 @@ const SKIP = new Set([
   'node_modules',
   'release',
   'src/pages/for-sellers',
-  'src/pages/sell.astro',
   'worker',
   'src/data/offers',
   'src/components/DemoBanner.astro',
@@ -146,8 +145,8 @@ const wrangler = (await readFile(wranglerFile, 'utf8'))
   .replace(/"name": "[^"]*"/, '"name": "crochet-shop"')
   .replace(/^.*"account_id".*\r?\n/m, '')
   .replace(/^.*"routes".*\r?\n/m, '')
-  .replace(/^\s*\/\/ (The demo shop|the Cloudflare account|Only \/sell).*\r?\n/gm, '')
-  // The /sell Worker is only for the demo; a client's shop is static assets only.
+  .replace(/^\s*\/\/ (The demo shop|the Cloudflare account|Only \/for-sellers).*\r?\n/gm, '')
+  // The /for-sellers/ Worker is only for the demo; a client's shop is static assets only.
   .replace(/^.*"(main|binding|run_worker_first)".*\r?\n/gm, '');
 if (/account_id|leadspilot|run_worker_first|"main"/.test(wrangler)) throw new Error('Couldn’t reset wrangler.jsonc; update make-starter.mjs.');
 await writeFile(wranglerFile, wrangler);

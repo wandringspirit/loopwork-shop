@@ -18,7 +18,7 @@ The admin at `/admin` only exists while `npm run dev` runs. It writes straight i
 
 | | |
 |---|---|
-| Worker | `loopwork-demo`: static assets, plus `worker/index.js`, which only runs for `/sell` and redirects to the ₹ or USD sales page by country |
+| Worker | `loopwork-demo`: static assets, plus `worker/index.js`, which only runs for `/for-sellers/` and shows the ₹ or USD sales page there by country (a visitor's choice from the switch link is kept in a `region` cookie) |
 | Cloudflare account | the one that owns leadspilot.co: **leadpilot01@gmail.com**, account `53053160…` |
 | Domain | `loopwork.leadspilot.co`, a custom domain on the Worker (`routes` in `wrangler.jsonc`) |
 | Config | `wrangler.jsonc` |
@@ -55,7 +55,7 @@ npx wrangler rollback <version-id>
 
 ### After deploying
 
-- Open https://loopwork.leadspilot.co, `/for-sellers/` and `/for-sellers/international/` on a phone.
+- Open https://loopwork.leadspilot.co, `/for-sellers/` (it should show ₹ from India), `/for-sellers/india/` and `/for-sellers/international/` on a phone, and try the "Prices in USD" switch.
 - If you changed prices or the seller number, make the handouts again (below).
 
 ## The sales handouts (PDF)
@@ -66,7 +66,7 @@ The PDFs are printed from the built site, so the photos load:
 2. Print each page to PDF with headless Chrome:
 
 ```bash
-"/c/Program Files/Google/Chrome/Application/chrome.exe" --headless=new --no-pdf-header-footer --virtual-time-budget=8000 --print-to-pdf="docs/for-sellers.pdf" http://localhost:4322/for-sellers/
+"/c/Program Files/Google/Chrome/Application/chrome.exe" --headless=new --no-pdf-header-footer --virtual-time-budget=8000 --print-to-pdf="docs/for-sellers.pdf" http://localhost:4322/for-sellers/india/
 ```
 
 ```bash

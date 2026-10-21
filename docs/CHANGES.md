@@ -10,7 +10,7 @@ Newest first. Dates are IST.
 
 ## 2026-10-21
 
-- **Sales:** Added `/sell`, which opens the ₹ sales page for visitors in India and the USD page for everyone else, using Cloudflare's country for the request (`worker/index.js`, run only for `/sell`). Without the Worker (local dev, preview), `src/pages/sell.astro` guesses from the browser's time zone. The demo banner links to `/sell/`; client copies leave all of this out.
+- **Sales:** `/for-sellers/` is now the one sales address for everyone: visitors in India see the ₹ page and everyone else the USD page, at the same address, using Cloudflare's country for the request (`worker/index.js`, run only for `/for-sellers/`). The "Prices in ₹ / USD" links add `?region=in|intl`, remembered in a `region` cookie. The two versions also have their own addresses, `/for-sellers/india/` and `/for-sellers/international/`. Without the Worker (local dev, preview), `src/pages/for-sellers/index.astro` guesses from the browser's time zone. Client copies leave all of this out.
 - **Docs:** Added CHANGES, DEPLOY, OUTREACH (how to find and close buyers) and ROADMAP. ARCHITECTURE.md moved to v0.3.
 - **Sales:** Added `/for-sellers/international/`, a sales page for sellers outside India, priced in US dollars and paid by PayPal invoice. Both sales pages now share `src/components/SellerOffer.astro`, link to each other and declare `hreflang` alternates. Prices moved to `src/data/offers/india.json` and `international.json`. Added the handout `docs/for-sellers-international.pdf`.
 - **Sales:** The WhatsApp number and demo address in the printed handout are now links. `be6941e`
