@@ -137,6 +137,16 @@ const readme = (await readFile(readmeFile, 'utf8'))
   .replace(/^## Sell this as a done-for-you shop[\s\S]*?(?=^## )/m, '');
 await writeFile(readmeFile, readme);
 
+// Wrangler: the demo's Worker name, Cloudflare account and domain belong to you, not the client.
+const wranglerFile = join(out, 'wrangler.jsonc');
+const wrangler = (await readFile(wranglerFile, 'utf8'))
+  .replace(/"name": "[^"]*"/, '"name": "crochet-shop"')
+  .replace(/^.*"account_id".*\r?\n/m, '')
+  .replace(/^.*"routes".*\r?\n/m, '')
+  .replace(/^\s*\/\/ (The demo shop|the Cloudflare account).*\r?\n/gm, '');
+if (/account_id|leadspilot/.test(wrangler)) throw new Error('Couldn’t reset wrangler.jsonc; update make-starter.mjs.');
+await writeFile(wranglerFile, wrangler);
+
 const pkgFile = join(out, 'package.json');
 const pkg = JSON.parse(await readFile(pkgFile, 'utf8'));
 delete pkg.scripts.starter;

@@ -68,7 +68,10 @@ const rupees = (price: number) => formatPrice(price);
     <header class="wrap topbar">
       <p class="topbar-name">{sellerName || 'Shop websites'} <span>for handmade sellers</span></p>
       <a class="text-link" href="/">See the demo shop</a>
-      <p class="topbar-print">WhatsApp {formatWhatsApp(sellerWhatsapp)} · Demo: {new URL('/', Astro.site).host}</p>
+      <p class="topbar-print">
+        WhatsApp <a href={contactUrl}>{formatWhatsApp(sellerWhatsapp)}</a> · Demo:
+        <a href={new URL('/', Astro.site).href}>{new URL('/', Astro.site).host}</a>
+      </p>
     </header>
 
     <main>
@@ -676,6 +679,11 @@ const rupees = (price: number) => formatPrice(price);
     .topbar-print {
       display: block;
       font-weight: 700;
+    }
+
+    .topbar-print a {
+      color: var(--berry);
+      text-underline-offset: 0.15em;
     }
 
     .outro {

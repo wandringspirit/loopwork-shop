@@ -1,6 +1,9 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "crochet-shop",
+  // The demo shop at loopwork.leadspilot.co. `npm run starter` resets the name, account and route for a client.
+  "name": "loopwork-demo",
+  // the Cloudflare account that owns leadspilot.co (leadpilot01@gmail.com): a login to another account fails
+  "account_id": "53053160af6109a9f82d179922a6c7b4",
   "compatibility_date": "2026-09-01",
   // Round 1 is a fully static site. Round 2 adds the Worker code for /api/*.
   "assets": {
@@ -8,5 +11,6 @@
     "not_found_handling": "404-page",
     "html_handling": "auto-trailing-slash"
   },
+  "routes": [{ "pattern": "loopwork.leadspilot.co", "custom_domain": true }],
   "observability": { "enabled": true }
 }
