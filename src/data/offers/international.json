@@ -1,0 +1,70 @@
+{
+  "plans": [
+    {
+      "name": "Starter",
+      "price": 299,
+      "per": "one-time",
+      "colour": "teal",
+      "blurb": "A ready shop with your name, products and WhatsApp.",
+      "includes": [
+        "Up to 15 products from your photos and price list",
+        "Shop, product, cart, About, Contact, FAQ and policy pages",
+        "Prices in your currency",
+        "Set up on your own domain",
+        "1 round of changes"
+      ]
+    },
+    {
+      "name": "Shop",
+      "price": 549,
+      "per": "one-time",
+      "colour": "berry",
+      "popular": true,
+      "blurb": "Everything in Starter, written and polished for you.",
+      "includes": [
+        "Up to 40 products",
+        "Custom orders page for commissions",
+        "Your About story, FAQ and policies written for you",
+        "Photos cropped and tidied for the shop",
+        "2 rounds of changes"
+      ]
+    },
+    {
+      "name": "Care plan",
+      "price": 29,
+      "per": "a month",
+      "colour": "marigold",
+      "blurb": "Send changes on WhatsApp or email and we update the shop.",
+      "includes": [
+        "New products, price changes and sold-out updates",
+        "Changes done within 2 working days",
+        "Domain and hosting looked after",
+        "Cancel any time"
+      ]
+    }
+  ],
+  "addOns": [
+    {
+      "name": "Card and PayPal checkout",
+      "price": 199,
+      "from": true,
+      "text": "A checkout page where customers pay on the site by card, Apple Pay or Google Pay with Stripe, or with PayPal. Payment fees are charged by the provider."
+    },
+    {
+      "name": "Order book",
+      "price": 79,
+      "text": "Every order is also saved to a Google Sheet, so nothing gets lost in your messages."
+    },
+    {
+      "name": "Extra products",
+      "price": 5,
+      "per": "each",
+      "text": "Products beyond your plan's limit."
+    },
+    {
+      "name": "Simple logo",
+      "price": 99,
+      "text": "A clean wordmark and icon for the site, Instagram and other profiles."
+    }
+  ]
+}

@@ -93,7 +93,7 @@ Round 2 adds the Cloudflare Worker and Make, so orders also land in a Google She
 This project is also the demo you show to other handmade sellers.
 
 - **Demo banner:** while `demo.enabled` is `true` in `src/data/settings.json`, every page shows a "Demo shop" bar that links to the sales page. Set it to `false` to go back to the normal preview banner.
-- **Sales page:** `/for-sellers/` (`src/pages/for-sellers.astro`). Plans, prices and add-ons are in `src/data/offer.json`. Put your own WhatsApp number in `demo.sellerWhatsapp` (and optionally your name or studio name in `demo.sellerName`), or the **Chat on WhatsApp** buttons go nowhere. Open the page and use **Print → Save as PDF** for a handout to send on WhatsApp.
+- **Sales pages:** `/for-sellers/` for India (₹) and `/for-sellers/international/` for everyone else (US dollars, paid by PayPal invoice). Both use `src/components/SellerOffer.astro`; each page's copy is in `src/pages/for-sellers/`, and its plans, prices and add-ons in `src/data/offers/india.json` or `international.json`. Put your own WhatsApp number in `demo.sellerWhatsapp` (and optionally your name or studio name in `demo.sellerName`), or the **Chat on WhatsApp** buttons go nowhere. Open a page and use **Print → Save as PDF** for a handout to send on WhatsApp; the current ones are `docs/for-sellers.pdf` and `docs/for-sellers-international.pdf`.
 - **A copy for a client:** run
 
   ```bash

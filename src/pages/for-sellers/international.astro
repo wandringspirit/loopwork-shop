@@ -1,0 +1,52 @@
+---
+import SellerOffer from '../../components/SellerOffer.astro';
+import offer from '../../data/offers/international.json';
+
+// The sales page for sellers outside India, in US dollars, paid by PayPal invoice.
+// Prices and add-ons: src/data/offers/international.json.
+
+const dollars = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
+---
+
+<SellerOffer
+  path="/for-sellers/international/"
+  lang="en"
+  title="A shop website for your handmade business"
+  description="Your own shop website with your products and your name. No marketplace fees and no monthly platform plan. Prices in US dollars."
+  money={(price) => dollars.format(price)}
+  offer={offer}
+  intro={{
+    eyebrow: 'For crochet, craft and handmade sellers worldwide',
+    title: 'Your own shop website, without the marketplace fees.',
+    lede: 'Your products, your name, your domain. Customers browse, fill a cart and send you the order on WhatsApp, or pay on the site by card or PayPal with the checkout add-on.',
+    facts: ['Ready in about a week', 'No monthly platform fee', 'Card and PayPal checkout available'],
+  }}
+  chatLines={['1 × Carrot Bunny (Peach) — $24', '2 × Bobble Coasters — $18']}
+  features={[
+    { colour: 'berry', title: 'Your own website', text: 'Your shop on your own domain, not a listing next to hundreds of competitors on a marketplace.' },
+    { colour: 'teal', title: 'Keep more of each sale', text: 'No listing fees or marketplace commission. Only the payment provider’s fee if you take payments online.' },
+    { colour: 'marigold', title: 'Made for phones', text: 'Fast and easy to use on a phone, where most of your Instagram and TikTok buyers are.' },
+    { colour: 'mint', title: 'Colours and sizes', text: 'Products can have options, and show ready to ship, made to order or sold out.' },
+    { colour: 'lilac', title: 'Custom orders', text: 'A page where people describe a commission: idea, colours, size and budget.' },
+    { colour: 'coral', title: 'No monthly fee', text: 'Hosting runs on a free plan. You only pay for your domain, about $10–20 a year.' },
+  ]}
+  steps={[
+    { title: 'Send your details', text: 'Photos, prices and a few lines about your shop, on WhatsApp.' },
+    { title: 'We build it', text: 'Your shop is ready to review in about a week.' },
+    { title: 'Go live', text: 'We connect your domain and test an order with you.' },
+    { title: 'Keep it fresh', text: 'Update products yourself, or let the care plan handle it.' },
+  ]}
+  faqs={[
+    { q: 'How do I pay?', a: 'By PayPal invoice in US dollars: half to start, half when your shop is ready to go live. You can pay with a PayPal account or a card.' },
+    { q: 'Do you work with sellers in my country?', a: 'Yes. We are based in India and work with sellers anywhere over WhatsApp. Your shop shows prices in your currency.' },
+    { printed: false, q: 'Can customers pay on the website?', a: 'Yes, with the checkout add-on: cards, Apple Pay and Google Pay through Stripe, or PayPal. Without it, customers send the order on WhatsApp and you send them a payment link.' },
+    { q: 'Who owns the domain?', a: 'You do. It is registered in your name, and you renew it each year.' },
+    { printed: false, q: 'What does it cost each month?', a: 'Nothing, unless you choose the care plan. Hosting runs on a free plan; the domain is a yearly cost of about $10–20.' },
+  ]}
+  otherMarket={{ href: '/for-sellers/', label: 'In India? Prices in ₹' }}
+  alternates={[
+    ['en-IN', '/for-sellers/'],
+    ['en', '/for-sellers/international/'],
+    ['x-default', '/for-sellers/international/'],
+  ]}
+/>

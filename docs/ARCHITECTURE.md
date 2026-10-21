@@ -1,6 +1,8 @@
 # Crochet Shop — Architecture & Order Workflow
 
-**Status:** v0.2 (2026-09-13). Round 1 is built: static site, cart, ordering through WhatsApp, 15 sample products. The open questions in §14 still apply.
+**Status:** v0.3 (2026-10-21). Round 1 is built: static site, cart, ordering through WhatsApp, 15 sample products. The open questions in §14 still apply.
+
+**Since v0.2 (2026-10-21):** the site is also the demo for selling done-for-you shops to other handmade sellers. It adds a demo banner (`src/components/DemoBanner.astro`, on while `demo.enabled` is true in `src/data/settings.json`), two sales pages built from `src/components/SellerOffer.astro` (`/for-sellers/` in ₹ and `/for-sellers/international/` in USD, with prices in `src/data/offers/*.json`), and `npm run starter` (`scripts/make-starter.mjs`), which makes a client copy without the demo parts, the Unsplash photos or the demo's Cloudflare settings. Deployment is in [DEPLOY.md](DEPLOY.md); the plan for selling is in [OUTREACH.md](OUTREACH.md) and [ROADMAP.md](ROADMAP.md).
 **Visual version (with diagrams):** https://claude.ai/code/artifact/73687ba7-b604-422d-b84c-fe358e67673c
 
 ---

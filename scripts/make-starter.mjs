@@ -27,9 +27,10 @@ const SKIP = new Set([
   'docs',
   'node_modules',
   'release',
-  'src/pages/for-sellers.astro',
-  'src/data/offer.json',
+  'src/pages/for-sellers',
+  'src/data/offers',
   'src/components/DemoBanner.astro',
+  'src/components/SellerOffer.astro',
   'scripts',
 ]);
 
