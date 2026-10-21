@@ -27,6 +27,9 @@ const SKIP = new Set([
   'docs',
   'node_modules',
   'release',
+  // secrets: a Cloudflare API token here must never reach a client
+  '.env',
+  '.dev.vars',
   'src/pages/for-sellers',
   'worker',
   'src/data/offers',
@@ -71,7 +74,13 @@ if (existsSync(out) && (await readdir(out)).length > 0) {
 }
 
 await mkdir(out, { recursive: true });
-const keep = (source) => !SKIP.has(relative(root, source).split(sep).join('/'));
+/** Secret files anywhere in the tree (.env, .env.production, .dev.vars…), but not *.example templates. */
+const SECRET = /^\.(env|dev\.vars)(\..+)?$/;
+const keep = (source) => {
+  const name = basename(source);
+  if (SECRET.test(name) && !name.endsWith('.example')) return false;
+  return !SKIP.has(relative(root, source).split(sep).join('/'));
+};
 // Copied one top-level entry at a time: Node won't copy a folder into its own release/ subfolder.
 for (const entry of await readdir(root)) {
   const source = join(root, entry);
