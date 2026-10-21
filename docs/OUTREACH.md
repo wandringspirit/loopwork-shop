@@ -97,7 +97,7 @@ Change the bracketed parts every time. Mention something specific about their wo
 | "I sell fine on Instagram." | "Keep Instagram, it's where people find you. The shop is where they buy: prices, sizes and what's in stock are all in one place, and orders come in complete instead of over 20 messages." |
 | "It's too expensive." | India: "Shopify alone is about ₹1,500 a month, ₹18,000 a year before apps. This is a one-time [price], and hosting is free." Abroad: "Shopify is about $29–39 a month, every month. This is one payment, and Etsy takes 10–15% of every sale." |
 | "I'm not technical." | "You don't need to be. You send photos and prices, and I do everything. With the care plan you just WhatsApp me changes." |
-| "What if I need changes later?" | "The care plan covers it: [₹499 / $29] a month, cancel any time. Or pay per change." |
+| "What if I need changes later?" | "The care plan covers it: [₹299 / $29] a month, cancel any time. Or pay per change." |
 | "Etsy brings me buyers." | "Keep Etsy for new buyers. Send your Instagram followers and repeat customers to your own shop, where you keep the whole sale." |
 | "Can customers pay online?" | "Yes, that's an add-on: Razorpay (UPI, cards) in India, or Stripe and PayPal abroad." |
 | "Is it only for crochet?" | "No, the demo is crochet, but it works for anything handmade: candles, jewellery, bakes, prints." |
